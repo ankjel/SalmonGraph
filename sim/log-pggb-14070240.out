@@ -1,0 +1,127 @@
+START
+Wed Dec  8 09:14:56 CET 2021
+RUN PGGB
+[wfmash::map] Reference = [mergedVISOR.fasta]
+[wfmash::map] Query = [mergedVISOR.fasta]
+[wfmash::map] Kmer size = 16
+[wfmash::map] Window size = 256
+[wfmash::map] Segment length = 100000 (read split disabled)
+[wfmash::map] Block length min = 300000
+[wfmash::map] Alphabet = DNA
+[wfmash::map] Percentage identity threshold = 97%
+[wfmash::map] Mapping output file = /home/work/ankjelst/wfmash-Lk5Chd
+[wfmash::map] Filter mode = 1 (1 = map, 2 = one-to-one, 3 = none)
+[wfmash::map] Execution threads  = 8
+[wfmash::skch::Sketch::build] minimizers picked from reference = 976794
+[wfmash::skch::Sketch::index] unique minimizers = 305813
+[wfmash::skch::Sketch::computeFreqHist] Frequency histogram of minimizers = (1, 24) ... (2000, 1)
+[wfmash::skch::Sketch::computeFreqHist] With threshold 0.001%, ignore minimizers occurring >= 1939 times during lookup.
+[wfmash::map] time spent computing the reference index: 3.28469 sec
+[wfmash::skch::Map::mapQuery] WARNING, no .fai index found for mergedVISOR.fasta, reading file to sum sequence length (slow)
+[wfmash::skch::Map::mapQuery] mapped 25.00% @ 1.28e+08 bp/s elapsed: 00:00:00:00 remain: 00:00:00:00[wfmash::skch::Map::mapQuery] mapped 50.00% @ 1.27e+08 bp/s elapsed: 00:00:00:00 remain: 00:00:00:00[wfmash::skch::Map::mapQuery] mapped 50.00% @ 8.50e+07 bp/s elapsed: 00:00:00:00 remain: 00:00:00:00[wfmash::skch::Map::mapQuery] mapped 50.00% @ 6.37e+07 bp/s elapsed: 00:00:00:01 remain: 00:00:00:01[wfmash::skch::Map::mapQuery] mapped 50.00% @ 5.10e+07 bp/s elapsed: 00:00:00:01 remain: 00:00:00:01[wfmash::skch::Map::mapQuery] mapped 50.00% @ 4.25e+07 bp/s elapsed: 00:00:00:01 remain: 00:00:00:01[wfmash::skch::Map::mapQuery] mapped 50.00% @ 3.64e+07 bp/s elapsed: 00:00:00:01 remain: 00:00:00:01[wfmash::skch::Map::mapQuery] mapped 50.00% @ 3.19e+07 bp/s elapsed: 00:00:00:02 remain: 00:00:00:02[wfmash::skch::Map::mapQuery] mapped 50.00% @ 2.83e+07 bp/s elapsed: 00:00:00:02 remain: 00:00:00:02[wfmash::skch::Map::mapQuery] mapped 50.00% @ 2.55e+07 bp/s elapsed: 00:00:00:02 remain: 00:00:00:02[wfmash::skch::Map::mapQuery] mapped 50.00% @ 2.32e+07 bp/s elapsed: 00:00:00:02 remain: 00:00:00:02[wfmash::skch::Map::mapQuery] mapped 50.00% @ 2.12e+07 bp/s elapsed: 00:00:00:03 remain: 00:00:00:03[wfmash::skch::Map::mapQuery] mapped 50.00% @ 1.96e+07 bp/s elapsed: 00:00:00:03 remain: 00:00:00:03[wfmash::skch::Map::mapQuery] mapped 50.00% @ 1.82e+07 bp/s elapsed: 00:00:00:03 remain: 00:00:00:03[wfmash::skch::Map::mapQuery] mapped 50.00% @ 1.70e+07 bp/s elapsed: 00:00:00:03 remain: 00:00:00:03[wfmash::skch::Map::mapQuery] mapped 50.00% @ 1.59e+07 bp/s elapsed: 00:00:00:04 remain: 00:00:00:04[wfmash::skch::Map::mapQuery] mapped 50.00% @ 1.50e+07 bp/s elapsed: 00:00:00:04 remain: 00:00:00:04[wfmash::skch::Map::mapQuery] mapped 50.00% @ 1.42e+07 bp/s elapsed: 00:00:00:04 remain: 00:00:00:04[wfmash::skch::Map::mapQuery] mapped 50.00% @ 1.34e+07 bp/s elapsed: 00:00:00:04 remain: 00:00:00:04[wfmash::skch::Map::mapQuery] mapped 50.00% @ 1.27e+07 bp/s elapsed: 00:00:00:05 remain: 00:00:00:05[wfmash::skch::Map::mapQuery] mapped 50.00% @ 1.21e+07 bp/s elapsed: 00:00:00:05 remain: 00:00:00:05[wfmash::skch::Map::mapQuery] mapped 75.00% @ 1.74e+07 bp/s elapsed: 00:00:00:05 remain: 00:00:00:01[wfmash::skch::Map::mapQuery] mapped 100.00% @ 2.22e+07 bp/s elapsed: 00:00:00:05 remain: 00:00:00:00
+[wfmash::skch::Map::mapQuery] count of mapped reads = 1, reads qualified for mapping = 2, total input reads = 2, total input bp = 127650786
+[wfmash::map] time spent mapping the query: 5.99e+00 sec
+[wfmash::map] mapping results saved in: /home/work/ankjelst/wfmash-Lk5Chd
+[wfmash::align] Reference = [mergedVISOR.fasta]
+[wfmash::align] Query = [mergedVISOR.fasta]
+[wfmash::align] Mapping file = /home/work/ankjelst/wfmash-Lk5Chd
+[wfmash::align] Alignment identity cutoff = 9.70e-01%
+[wfmash::align] Alignment output file = /dev/stdout
+[wfmash::align] time spent read the reference sequences: 9.80e-08 sec
+[wfmash::align::computeAlignments] aligned 100.00% @ 1.57e+06 bp/s elapsed: 00:00:00:40 remain: 00:00:00:00
+[wfmash::align::computeAlignments] count of mapped reads = 2, total aligned bp = 63823863
+[wfmash::align] time spent computing the alignment: 4.10e+01 sec
+[wfmash::align] alignment results saved in: /dev/stdout
+wfmash -X -s 100000 -l 300000 -N -p 97 -n 10 -k 16 -t 8 mergedVISOR.fasta mergedVISOR.fasta
+58.37s user 2.57s system 119% cpu 51.18s total 634584Kb max memory
+[seqwish::seqidx] 0.004 indexing sequences
+[seqwish::seqidx] 0.714 index built
+[seqwish::alignments] 0.714 processing alignments
+[seqwish::alignments] 1.842 indexing
+[seqwish::alignments] 1.843 index built
+[seqwish::transclosure] 1.848 computing transitive closures
+[seqwish::transclosure] 1.889 0.00% 0-10000000 overlap_collect
+[seqwish::transclosure] 2.286 0.00% 0-10000000 rank_build
+[seqwish::transclosure] 2.906 0.00% 0-10000000 parallel_union_find
+[seqwish::transclosure] 3.438 0.00% 0-10000000 dset_write
+[seqwish::transclosure] 3.740 0.00% 0-10000000 dset_compression
+[seqwish::transclosure] 4.059 0.00% 0-10000000 dset_sort
+[seqwish::transclosure] 4.369 0.00% 0-10000000 dset_invert
+[seqwish::transclosure] 4.738 0.00% 0-10000000 graph_emission
+[seqwish::transclosure] 4.848 15.67% 10000000-20000000 overlap_collect
+[seqwish::transclosure] 5.128 15.67% 10000000-20000000 rank_build
+[seqwish::transclosure] 5.748 15.67% 10000000-20000000 parallel_union_find
+[seqwish::transclosure] 7.253 15.67% 10000000-20000000 dset_write
+[seqwish::transclosure] 7.839 15.67% 10000000-20000000 dset_compression
+[seqwish::transclosure] 8.219 15.67% 10000000-20000000 dset_sort
+[seqwish::transclosure] 8.574 15.67% 10000000-20000000 dset_invert
+[seqwish::transclosure] 8.946 15.67% 10000000-20000000 graph_emission
+[seqwish::transclosure] 9.062 31.33% 20000000-30000000 overlap_collect
+[seqwish::transclosure] 9.424 31.33% 20000000-30000000 rank_build
+[seqwish::transclosure] 10.073 31.33% 20000000-30000000 parallel_union_find
+[seqwish::transclosure] 12.098 31.33% 20000000-30000000 dset_write
+[seqwish::transclosure] 12.463 31.33% 20000000-30000000 dset_compression
+[seqwish::transclosure] 12.827 31.33% 20000000-30000000 dset_sort
+[seqwish::transclosure] 13.110 31.33% 20000000-30000000 dset_invert
+[seqwish::transclosure] 13.496 31.33% 20000000-30000000 graph_emission
+[seqwish::transclosure] 13.617 47.00% 30000000-40000000 overlap_collect
+[seqwish::transclosure] 14.030 47.00% 30000000-40000000 rank_build
+[seqwish::transclosure] 14.718 47.00% 30000000-40000000 parallel_union_find
+[seqwish::transclosure] 17.040 47.00% 30000000-40000000 dset_write
+[seqwish::transclosure] 17.548 47.00% 30000000-40000000 dset_compression
+[seqwish::transclosure] 17.891 47.00% 30000000-40000000 dset_sort
+[seqwish::transclosure] 18.203 47.00% 30000000-40000000 dset_invert
+[seqwish::transclosure] 18.585 47.00% 30000000-40000000 graph_emission
+[seqwish::transclosure] 18.734 62.67% 40000000-50000000 overlap_collect
+[seqwish::transclosure] 19.126 62.67% 40000000-50000000 rank_build
+[seqwish::transclosure] 19.827 62.67% 40000000-50000000 parallel_union_find
+[seqwish::transclosure] 21.735 62.67% 40000000-50000000 dset_write
+[seqwish::transclosure] 22.207 62.67% 40000000-50000000 dset_compression
+[seqwish::transclosure] 22.546 62.67% 40000000-50000000 dset_sort
+[seqwish::transclosure] 22.840 62.67% 40000000-50000000 dset_invert
+[seqwish::transclosure] 23.221 62.67% 40000000-50000000 graph_emission
+[seqwish::transclosure] 23.383 78.33% 50000000-60000000 overlap_collect
+[seqwish::transclosure] 23.778 78.33% 50000000-60000000 rank_build
+[seqwish::transclosure] 24.512 78.33% 50000000-60000000 parallel_union_find
+[seqwish::transclosure] 26.972 78.33% 50000000-60000000 dset_write
+[seqwish::transclosure] 27.419 78.33% 50000000-60000000 dset_compression
+[seqwish::transclosure] 27.765 78.33% 50000000-60000000 dset_sort
+[seqwish::transclosure] 28.068 78.33% 50000000-60000000 dset_invert
+[seqwish::transclosure] 28.458 78.33% 50000000-60000000 graph_emission
+[seqwish::transclosure] 28.687 94.00% 60000000-127650786 overlap_collect
+[seqwish::transclosure] 29.047 94.00% 60000000-127650786 rank_build
+[seqwish::transclosure] 29.544 94.00% 60000000-127650786 parallel_union_find
+[seqwish::transclosure] 30.181 94.00% 60000000-127650786 dset_write
+[seqwish::transclosure] 30.477 94.00% 60000000-127650786 dset_compression
+[seqwish::transclosure] 30.636 94.00% 60000000-127650786 dset_sort
+[seqwish::transclosure] 30.777 94.00% 60000000-127650786 dset_invert
+[seqwish::transclosure] 30.984 94.00% 60000000-127650786 graph_emission
+[seqwish::transclosure] 32.584 100.00% building node_iitree and path_iitree indexes
+[seqwish::transclosure] 32.585 100.00% done
+[seqwish::transclosure] 32.585 done with transitive closures
+[seqwish::compact] 32.585 compacting nodes
+[seqwish::compact] 32.665 done compacting
+[seqwish::compact] 32.676 built node index
+[seqwish::links] 32.676 finding graph links
+[seqwish::links] 32.678 links derived
+[seqwish::gfa] 32.678 writing graph
+[seqwish::gfa] 36.617 done
+seqwish -t 8 -s mergedVISOR.fasta -p pggb.out/mergedVISOR.fasta.1be2680.wfmash.paf -k 311 -g pggb.out/mergedVISOR.fasta.1be2680.4030258.seqwish.gfa -B 10000000 -P
+85.88s user 9.30s system 258% cpu 36.80s total 1504988Kb max memory
+[smoothxg::main] loading graph
+[smoothxg::main] prepping graph for smoothing
+[odgi::gfa_to_handle] building nodes:  1.67% @ 1.01e+03/s elapsed: 00:00:00:00 remain: 00:00:00:00[odgi::gfa_to_handle] building nodes: 68.33% @ 1.63e+02/s elapsed: 00:00:00:00 remain: 00:00:00:00[odgi::gfa_to_handle] building nodes: 100.00% @ 1.20e+02/s elapsed: 00:00:00:00 remain: 00:00:00:00
+[odgi::gfa_to_handle] building edges:  2.38% @ 1.00e+01/s elapsed: 00:00:00:00 remain: 00:00:00:08[odgi::gfa_to_handle] building edges: 100.00% @ 1.87e+02/s elapsed: 00:00:00:00 remain: 00:00:00:00
+[odgi::gfa_to_handle] building paths: 50.00% @ 1.69e+01/s elapsed: 00:00:00:00 remain: 00:00:00:00[odgi::gfa_to_handle] building paths: 100.00% @ 6.46e+00/s elapsed: 00:00:00:00 remain: 00:00:00:00
+[smoothxg::prep] building path index
+[smoothxg::prep] sorting graph
+[odgi::path_linear_sgd] calculating linear SGD schedule (5.41e-04 1.00e+00 100 0 1.00e-02)
+[odgi::path_linear_sgd] calculating zetas for 43 zipf distributions
+[odgi::path_linear_sgd] 1D path-guided SGD:  0.03% @ 2.09e+02/s elapsed: 00:00:00:00 remain: 00:00:00:41[odgi::path_linear_sgd] 1D path-guided SGD: 100.00% @ 3.37e+04/s elapsed: 00:00:00:00 remain: 00:00:00:00
+[odgi::groom] grooming: 100.00% @ 2.84e+05/s elapsed: 00:00:00:00 remain: 00:00:00:00
+[odgi::groom] organizing handles: 100.00% @ 3.70e+05/s elapsed: 00:00:00:00 remain: 00:00:00:00
+[odgi::groom] flipped 0 handles
+[odgi::topological_order] sorting nodes: 100.00% @ 3.72e+04/s elapsed: 00:00:00:00 remain: 00:00:00:00
+[smoothxg::prep] chopping graph to 100
+[odgi::chop] 42 node(s) to chop.
+[smoothxg::prep] writing graph pggb.out/mergedVISOR.fasta.1be2680.4030258.seqwish.gfa.prep.gfa
