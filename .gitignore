@@ -39,5 +39,6 @@ vignettes/*.pdf
 .Renviron
 
 # slurm log files
+log-*
 *.log
 
