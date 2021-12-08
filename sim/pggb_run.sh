@@ -1,10 +1,10 @@
 #!/bin/bash
 
-#SBATCH --ntasks=8
+#SBATCH --ntasks=16
 #SBATCH --nodes=1                # Use 1 node
 #SBATCH --job-name=pggb  # sensible name for the job
-#SBATCH --mem=40G                 # Default memory per CPU is 3GB.
-#SBATCH --output=log-pggb-%j.out
+#SBATCH --mem=99G                 # Default memory per CPU is 3GB.
+#SBATCH --output=log-pggb-v020-%j.log
 
 #SBATCH --constraint="avx2" # IMPOTATANT!!! PGGB jobs will fail without this
 
@@ -14,36 +14,58 @@ echo "START"
 date
 
 
-OUTDIR=/mnt/SCRATCH/ankjelst/data/pggb.out
+######
+## Parameters
 
-INPUT=/mnt/SCRATCH/ankjelst/data/visor.hack/mergedVISOR.fasta
+fasta=/mnt/SCRATCH/ankjelst/data/visor.hack/mergedVISOR.fasta
 
-TMPOUT='pggb.out'
+#wfmash
+param_s=100000
+param_p=95
+param_n=5
+param_K=19
+param_i="$(basename $fasta)"
 
-BASENAME="$(basename $INPUT)"
+
+#seqwish
+param_k=85 # default 29
+
+#smoothxg
+param_H=2
+param_G=5G
+
+
+out=pggb-v020-G$param_G-k$param_k.out
+
+SCRATCHout=/mnt/SCRATCH/ankjelst/data/$out
+
+
+
+
+##########
+# Copy input files to tmpdir
 
 mkdir -p $TMPDIR/$USER #Not all nodes my TMP dir exist
 
 cd $TMPDIR/$USER
 
-cp $INPUT .  
+cp $fasta .
 
-if [ ! -d $out_dir ]
-then
-mkdir $out_dir
-fi
-
+####
+# Running pggb
 
 echo "RUN PGGB"
 
+singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif pggb -i $param_i -s $param_s -p $param_p -K $param_K \
+-n $param_n -t $SLURM_CPUS_ON_NODE -k $param_k -o $out -G $param_G -V ssa22:_  #OBSOBS the reference for the vcf here
+#specify a set of VCFs to produce with SPEC = [REF:SAMPLE_LIST_FILE] the paths matching ^REF are used as a reference
 
 
-singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif pggb -i $BASENAME -s 100000 -p 97 -n 10 -t $SLURM_CPUS_ON_NODE -I 0.7 -S -m -k 311 -o $TMPOUT -V ssa22:sample.list -N 
 echo "MOVE FILES TO SCRATCH"
 
-mkdir -p $OUTDIR
+mkdir -p $SCRATCHout
 
-mv -v $TMPOUT/* $OUTDIR
+mv -v $out/* $SCRATCHout
 
 cd ..
 
