@@ -9,9 +9,16 @@
 #SBATCH --output=log-ART-%j.log  # Logfile output here
 
 
-input_fasta=visor/visor.hack/h1.fa
 
+input_fasta=/mnt/SCRATCH/ankjelst/data/visor.hack/h1.fa
+outdir=/mnt/SCRATCH/ankjelst/data/art
 
+if [ ! -d $outdir ]
+then
+mkdir $outdir
+fi
+
+cd $outdir
 
 singularity exec /cvmfs/singularity.galaxyproject.org/a/r/art:2016.06.05--he1d7d6f_6 \
 art_illumina --seqSys HS25 -sam --in $input_fasta --paired --len 150 --fcov 20 --mflen 200 --sdev 10 --out sim_r_sim_SV

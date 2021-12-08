@@ -18,7 +18,7 @@ bed=$datadir/ssa22variants.bed
 ref=$datadir/simon22.fasta
 outhack=$datadir/visor.hack
 homedir=/mnt/users/ankjelst
-mergedfasta=$datadir/merged_ssa22.fasta
+mergedfasta=$outhack/mergedVISOR.fasta
 
 
 ####
