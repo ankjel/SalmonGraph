@@ -52,6 +52,9 @@ sed 's/>.*/&VISOR/' $outhack/h1.fa > $datadir/h1named.fa
 
 cat $ref $datadir/h1named.fa > $mergedfasta
 
+# index for the new fasta:
+
+singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools:1.9--h10a08f8_12 samtools faidx $mergedfasta
 
 echo "FINISHED"
 date
