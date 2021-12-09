@@ -10,9 +10,9 @@
 
 
 
-#################
-#Running giraffe!
-#################
+###########################
+#Read mapping with giraffe!
+###########################
 
 
 # First we need to index our graph
@@ -27,6 +27,8 @@ fi
 
 # cd to where I want the vg autoindex output
 cd $out_dir
+
+echo $(pwd)
 
 gfa=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.gfa
 
@@ -55,3 +57,20 @@ singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg giraffe \
 singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg stats -a mapped.gam
 
 
+# Variant calling
+##################
+
+#  First vg pack because vg call requires a .pack file 
+
+echo "Running vg pack:"
+
+singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg pack \
+-x $gfa -g mapped.gam -o visorpggb.pack -Q 5 -t $SLURM_CPUS_ON_NODE
+
+
+# then vg call
+
+echo "Running vg call"
+
+singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg call \
+$gfa -k visorpggb.pack > genotypes.vcf
