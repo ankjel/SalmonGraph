@@ -13,8 +13,7 @@ vcf.true <- read_delim(path.true, delim = "\t", comment="#", col_names = c('CHRO
 
 
 ###
-# Check for positions
-
+# Match positions
 
 find_variant<- function(trueVariants, foundVariants, tolerance=0){
   # Function to match true variants we inserted and the ones found with pggb
@@ -57,6 +56,26 @@ filter(full.table, TYPE == "insertion") -> insertions
 
 
 
+
+
+###
+# Definitly false variants
+
+filter(vcf, !(POS %in% full.table$our.position))
+
+
+####
+#Genotype vcf
+
+genotype.path <- "/mnt/SCRATCH/ankjelst/data/giraffe/genotypes.vcf"
+genotype.vcf <- read_delim(genotype.path, delim="\t", comment = "##")
+
+
+
+
+
+# NOT FINISHED
+# Plan: write code for finding FP, FN, TP
 false_variant <- function(trueVariants, foundVariants, tolerance=0){
   if (tolerance > 0){
     allowed_positions <- sapply(trueVariants, function(x) seq(x-tolerance, x+tolerance, 1))
@@ -68,3 +87,7 @@ false_variant <- function(trueVariants, foundVariants, tolerance=0){
 }
 
 false <- filter(vcf, POS == false_variant(vcf.true$START, vcf$POS, 20))
+
+
+
+
