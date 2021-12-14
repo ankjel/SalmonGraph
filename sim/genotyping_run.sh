@@ -31,6 +31,9 @@ cd $out_dir
 echo $(pwd)
 
 gfa=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.gfa
+fasta=/mnt/SCRATCH/ankjelst/data/simon22.fasta
+
+
 
 singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg autoindex \
 --prefix visorpggb --workflow giraffe --threads 8 --gfa $gfa 
@@ -73,4 +76,4 @@ singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg pack \
 echo "Running vg call"
 
 singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg call \
-$gfa -k visorpggb.pack > genotypes.vcf
+$gfa --pack visorpggb.pack --ref-fasta $fasta > genotypes.vcf
