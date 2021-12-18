@@ -2,7 +2,7 @@
 library(tidyverse)
 path.vcf <- "/mnt/SCRATCH/ankjelst/data/eu_merged_iris_no_simon.vcf"
 
-out.file <- "mnt/SCRATCH/ankjelst/data/ssa22variants.bed"
+out.file <- "/mnt/SCRATCH/ankjelst/data/ssa22variants.bed"
 
 vcf <- readr::read_tsv(path.vcf, col_names = c("chrom", "pos", "ID", 
                                            "ref", "alt", "qual", 
@@ -12,12 +12,11 @@ vcf <- readr::read_tsv(path.vcf, col_names = c("chrom", "pos", "ID",
 
 info <- c("SVTYPE", NA, "END", "SVLEN")
 
-vcf %>% 
+vcf.filtered <- vcf %>% 
   separate(info, into = info, sep=";", extra="drop", remove=FALSE) %>% 
   mutate(SVTYPE = str_remove(SVTYPE, pattern = "SVTYPE="),
          SVLEN = as.numeric(str_remove(SVLEN, pattern = "SVLEN=")),
-         END = as.numeric(str_remove(END, pattern = "END="))) %>% 
-  filter(pos > 14000000, END < 24000000)-> vcf.filtered
+         END = as.numeric(str_remove(END, pattern = "END="))) #%>% filter(pos > 14000000, END < 24000000)
 
 
 vcf.filtered %>% filter(str_detect(info, "SVTYPE=INS")) %>% 
@@ -31,11 +30,11 @@ vcf.filtered %>% filter(str_detect(info, "SVTYPE=DEL")) -> del
 
 # use sample() to select random rows from ins and del
 # no need to do this for inversions as we have less than 10
-set.seed(10)
+set.seed(100)
 
-ins <- ins[sample(nrow(ins), 10),]
-del <- del[sample(nrow(del), 10),]
-
+ins <- ins[sample(nrow(ins), 50),]
+del <- del[sample(nrow(del), 50),]
+inv <- inv[sample(nrow(inv), 20),]
 
 # merge to this format https://davidebolo1993.github.io/visordoc/usage/usage.html#visor-hack
 

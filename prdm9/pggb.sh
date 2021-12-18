@@ -1,10 +1,10 @@
 #!/bin/bash
 
-#SBATCH --ntasks=16
+#SBATCH --ntasks=8
 #SBATCH --nodes=1                # Use 1 node
 #SBATCH --job-name=pggb  # sensible name for the job
 #SBATCH --mem=99G                 # Default memory per CPU is 3GB.
-#SBATCH --output=log-pggb-v020-%j.log
+#SBATCH --output=log-pggb-%j.out
 
 #SBATCH --constraint="avx2" # IMPOTATANT!!! PGGB jobs will fail without this
 
@@ -17,7 +17,7 @@ date
 ######
 ## Parameters
 
-fasta=/mnt/SCRATCH/ankjelst/data/visor.hack/mergedVISOR.fasta
+fasta=/mnt/SCRATCH/ankjelst/data/prdm9/PRDM9a_znf-candidates_v1_PanSN-spec.fasta
 
 #wfmash
 param_s=100000
@@ -27,20 +27,24 @@ param_K=19
 param_i="$(basename $fasta)"
 
 
+
 #seqwish
-param_k=311 # default 29, 85 for prmd9?
+param_k=83
 
 #smoothxg
 param_H=2
 param_G=5G
 
+#deconstruct
+#param_V=ssa05:sample.list  
+#OBSOBS the reference for the vcf here
+#specify a set of VCFs to produce with SPEC = [REF:SAMPLE_LIST_FILE] the paths matching ^REF are used as a reference
+param_V=Simon:#
 
-out=pggb-v020-G$param_G-k$param_k.out
 
-SCRATCHout=/mnt/SCRATCH/ankjelst/data/$out
+SCRATCHout=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-G$param_G.out
 
-
-
+out=pggb-G$param_G.out
 
 ##########
 # Copy input files to tmpdir
@@ -56,10 +60,8 @@ cp $fasta .
 
 echo "RUN PGGB"
 
-singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif pggb -i $param_i -s $param_s -p $param_p -K $param_K \
--n $param_n -t $SLURM_CPUS_ON_NODE -k $param_k -o $out -G $param_G -V ssa22:_  #OBSOBS the reference for the vcf here
-#specify a set of VCFs to produce with SPEC = [REF:SAMPLE_LIST_FILE] the paths matching ^REF are used as a reference
-
+singularity exec /mnt/users/ankjelst/tools/pggb.sif pggb -i $param_i -s $param_s -p $param_p -K $param_K \
+-n $param_n -t $SLURM_CPUS_ON_NODE -k $param_k -o $out -G $param_G -V $param_V
 
 echo "MOVE FILES TO SCRATCH"
 

@@ -14,6 +14,14 @@
 #Read mapping with giraffe!
 ###########################
 
+#Extra step for prdm9
+
+# Need a fasta with only reference sequence
+
+refHeader=Simon#1#majorityconsensus
+
+singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools:1.14--hb421002_0 \
+samtools faidx $fullfasta $refHeader
 
 # First we need to index our graph
 ##################################
@@ -30,7 +38,7 @@ cd $out_dir
 
 echo $(pwd)
 
-gfa=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.gfa
+gfa=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-G5G.out/PRDM9a_znf-candidates_v1_PanSN-spec.fasta.2dd9516.8f341e3.c0b3beb.smooth.gfa
 fasta=/mnt/SCRATCH/ankjelst/data/simon22.fasta
 vcf=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.ssa22.vcf
 
