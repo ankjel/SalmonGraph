@@ -40,6 +40,10 @@ out=pggb-v020-G$param_G-k$param_k.out
 SCRATCHout=/mnt/SCRATCH/ankjelst/data/$out
 
 
+# -V will be the header of the reference for VCF file
+
+param_V=ssa22:_
+
 
 
 ##########
@@ -57,7 +61,7 @@ cp $fasta .
 echo "RUN PGGB"
 
 singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif pggb -i $param_i -s $param_s -p $param_p -K $param_K \
--n $param_n -t $SLURM_CPUS_ON_NODE -k $param_k -o $out -G $param_G -V ssa22:_  #OBSOBS the reference for the vcf here
+-n $param_n -t $SLURM_CPUS_ON_NODE -k $param_k -o $out -G $param_G -V $param_V  #OBSOBS the reference for the vcf here
 #specify a set of VCFs to produce with SPEC = [REF:SAMPLE_LIST_FILE] the paths matching ^REF are used as a reference
 
 

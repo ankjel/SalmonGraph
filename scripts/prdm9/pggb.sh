@@ -17,19 +17,21 @@ date
 ######
 ## Parameters
 
-fasta=/mnt/SCRATCH/ankjelst/data/prdm9/PRDM9a_znf-candidates_v1_PanSN-spec.fasta
+#fasta=/mnt/SCRATCH/ankjelst/data/prdm9/PRDM9a_znf-candidates_v1_PanSN-spec.fasta
+fasta=/mnt/SCRATCH/ankjelst/data/prdm9/Manually_phased_majority_consensus_sequences_PanSN-spec.fasta
+
 
 #wfmash
 param_s=100000
 param_p=95
-param_n=5
+param_n=17  #Ideally, you should set this to equal the number of haplotypes in the pangenome.
 param_K=19
 param_i="$(basename $fasta)"
 
 
 
 #seqwish
-param_k=83
+param_k=85
 
 #smoothxg
 param_H=2
@@ -42,7 +44,7 @@ param_G=5G
 param_V=Simon:#
 
 
-SCRATCHout=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-G$param_G.out
+SCRATCHout=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-G$param_G-k$param_k.out
 
 out=pggb-G$param_G.out
 
@@ -61,7 +63,7 @@ cp $fasta .
 echo "RUN PGGB"
 
 singularity exec /mnt/users/ankjelst/tools/pggb.sif pggb -i $param_i -s $param_s -p $param_p -K $param_K \
--n $param_n -t $SLURM_CPUS_ON_NODE -k $param_k -o $out -G $param_G -V $param_V
+-n $param_n -t $SLURM_CPUS_ON_NODE -k $param_k -o $out -G $param_G -V $param_V -L -v
 
 echo "MOVE FILES TO SCRATCH"
 
