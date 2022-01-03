@@ -41,7 +41,7 @@ param_G=5G
 #param_V=ssa05:sample.list  
 #OBSOBS the reference for the vcf here
 #specify a set of VCFs to produce with SPEC = [REF:SAMPLE_LIST_FILE] the paths matching ^REF are used as a reference
-param_V=Simon:#
+param_V='Simon:#,Maxine:#'
 
 
 SCRATCHout=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-G$param_G-k$param_k.out
@@ -62,7 +62,7 @@ cp $fasta .
 
 echo "RUN PGGB"
 
-singularity exec /mnt/users/ankjelst/tools/pggb.sif pggb -i $param_i -s $param_s -p $param_p -K $param_K \
+singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif pggb -i $param_i -s $param_s -p $param_p -K $param_K \
 -n $param_n -t $SLURM_CPUS_ON_NODE -k $param_k -o $out -G $param_G -V $param_V -L -v
 
 echo "MOVE FILES TO SCRATCH"

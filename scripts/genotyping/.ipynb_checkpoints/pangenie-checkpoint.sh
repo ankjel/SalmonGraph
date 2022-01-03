@@ -13,8 +13,7 @@ outdir=/mnt/SCRATCH/ankjelst/data/pangenie
 
 # VCF has to be phased, multisample and with non-overlapping variant.
 # Last part we handle with filtering out nested variants later in the script
-# The nested variants genotype are imputed as a last step in this script
-# pggb will 
+# The nested variants genotype are imputed as a last step
 
 deconstructed_vcf=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.ssa22.vcf
 

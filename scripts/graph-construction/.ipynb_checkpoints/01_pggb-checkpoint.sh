@@ -42,7 +42,7 @@ SCRATCHout=/mnt/SCRATCH/ankjelst/data/$out
 
 # -V will be the header of the reference for VCF file
 
-param_V=ssa22:_
+param_V=ssa22:#
 
 
 
