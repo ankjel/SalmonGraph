@@ -23,8 +23,8 @@ fasta=/mnt/SCRATCH/ankjelst/data/prdm9/Manually_phased_majority_consensus_sequen
 
 #wfmash
 param_s=100000
-param_p=95
-param_n=17  #Ideally, you should set this to equal the number of haplotypes in the pangenome.
+param_p=90
+param_n=16  #Ideally, you should set this to equal the number of haplotypes in the pangenome.
 param_K=19
 param_i="$(basename $fasta)"
 

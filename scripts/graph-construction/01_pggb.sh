@@ -22,7 +22,7 @@ fasta=/mnt/SCRATCH/ankjelst/data/visor.hack/mergedVISOR.fasta
 #wfmash
 param_s=100000
 param_p=95
-param_n=5
+param_n=2
 param_K=19
 param_i="$(basename $fasta)"
 

@@ -2,7 +2,7 @@
 
 #BATCH --nodes=1                  
 #SBATCH --ntasks=16                  # The number of threads reserved
-#SBATCH --mem=50G                     # The amount of memory reserved
+#SBATCH --mem=99G                     # The amount of memory reserved
 #SBATCH --partition=smallmem         
 #SBATCH --time=24:60:60              # Runs for maximum this time
 #SBATCH --job-name=pangenie       # Sensible name for the job
@@ -13,15 +13,18 @@ outdir=/mnt/SCRATCH/ankjelst/data/pangenie
 
 # VCF has to be phased, multisample and with non-overlapping variant.
 # Last part we handle with filtering out nested variants later in the script
-# The nested variants genotype are imputed as a last step
+# The nested variants genotype are imputed as a last step in this script
+# pggb will 
 
-deconstructed_vcf=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.ssa22.vcf
+#deconstructed_vcf=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.ssa22.vcf
 
+# vcf must be gziped for vcfbub
+deconstructed_vcf=/mnt/SCRATCH/ankjelst/data/pangenie/pggb-v020-G5G-k311.out/inputPangenie.fasta.2dd9516.4030258.8053ffa.smooth.simon.vcf.gz
 
-gfa=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.gfa
-fasta=/mnt/SCRATCH/ankjelst/data/simon22.fasta
+#gfa=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.gfa
+gfa=/mnt/SCRATCH/ankjelst/data/pangenie/pggb-v020-G5G-k311.out/inputPangenie.fasta.2dd9516.4030258.8053ffa.smooth.gfa
+fasta=/mnt/SCRATCH/ankjelst/data/pangenie/simon22Pangenie.fasta
 
-deconstructed_vcf=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.ssa22.vcf.gz
 filtered_vcf=/mnt/SCRATCH/ankjelst/data/deconstructed_filtered.vcf
 
 
@@ -50,7 +53,7 @@ echo "Filter vcf"
 # Erik Garrison already wrote one
 
 
-singularity exec $homedir/tools/rust.sif $homedir/tools/vcfbub -i $deconstructed_vcf --max-level 0 > $filtered_vcf  
+$homedir/tools/rust.sif $homedir/tools/vcfbub -i $deconstructed_vcf --max-level 0 > $filtered_vcf  
 
 
 ####################################################
@@ -74,4 +77,10 @@ $homedir/tools/pangenie/build/src/PanGenie -i $reads -r $fasta -v $filtered_vcf 
 
 echo "Resolve nested genotypes"
 
-#singularity exec $homedir/tools/rust.sif $homedir/tools/resolve-nested-genotypes $deconstructed_vcf pangenie.vcf > resolved_genotypes.vcf
+# zip vcf so we can index it
+singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools\:1.14--hb421002_0 bgzip pangenie_genotyping.vcf 
+# Index new vcf for resolving nested genotypes
+singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools\:1.14--hb421002_0 tabix -p vcf pangenie_genotyping.vcf.gz
+
+
+$homedir/tools/resolve-nested-genotypes $deconstructed_vcf pangenie_genotyping.vcf.gz > resolved_genotypes.vcf

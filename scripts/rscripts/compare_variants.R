@@ -10,7 +10,7 @@ source("metrics.R")
 ##################
 # load data
 
-path.vcf <- "/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k311.out/mergedVISOR.fasta.2dd9516.4030258.8053ffa.smooth.gfa"
+path.vcf <- "/mnt/SCRATCH/ankjelst/data/pangenie/pggb-v020-G5G-k311.out/inputPangenie.fasta.2dd9516.4030258.8053ffa.smooth.simon.vcf"
 
 vcf <- read_delim(path.vcf, delim = "\t", comment="#", col_names = c('CHROM', 'POS', 'ID', 'REF', 'ALT','QUAL',  'FILTER', 'INFO', 'FORMAT'))
 
