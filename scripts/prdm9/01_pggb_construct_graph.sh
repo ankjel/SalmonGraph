@@ -3,7 +3,7 @@
 #SBATCH --ntasks=8
 #SBATCH --nodes=1                # Use 1 node
 #SBATCH --job-name=pggb  # sensible name for the job
-#SBATCH --mem=99G                 # Default memory per CPU is 3GB.
+#SBATCH --mem=30G                 # Default memory per CPU is 3GB.
 #SBATCH --output=log-pggb-%j.out
 
 #SBATCH --constraint="avx2" # IMPOTATANT!!! PGGB jobs will fail without this
@@ -14,28 +14,27 @@ echo "START"
 date
 
 
+
 ######
 ## Parameters
 
-#fasta=/mnt/SCRATCH/ankjelst/data/prdm9/PRDM9a_znf-candidates_v1_PanSN-spec.fasta
-fasta=/mnt/SCRATCH/ankjelst/data/prdm9/Manually_phased_majority_consensus_sequences_PanSN-spec.fasta
-
+fasta=$1
 
 #wfmash
 param_s=100000
-param_p=90
+param_p=98
 param_n=16  #Ideally, you should set this to equal the number of haplotypes in the pangenome.
-param_K=19
+param_K=8
 param_i="$(basename $fasta)"
-
 
 
 #seqwish
 param_k=85
 
 #smoothxg
-param_H=2
-param_G=5G
+param_H=16
+param_G=200000
+
 
 #deconstruct
 #param_V=ssa05:sample.list  
@@ -44,7 +43,7 @@ param_G=5G
 param_V='Simon:#,Maxine:#'
 
 
-SCRATCHout=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-G$param_G-k$param_k.out
+SCRATCHout=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-$param_i-G$param_G-k$param_k.out
 
 out=pggb-G$param_G.out
 
