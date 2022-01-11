@@ -18,7 +18,7 @@ mkdir prdm9_both_haps
 for bam in Alto.bam Arnold.bam Barry.bam Bond.bam Brian.bam Klopp.bam Louis.bam Maxine.bam Simon.bam Tanner.bam Tess.bam
 do
         input=$bam
-        region1='ssa05:12773150-12773892'
+        region1='ssa05:12773188-127773343' # This depends on the reference
         ind=${bam/.bam/}
 
         samtools view -H $input > header.sam
