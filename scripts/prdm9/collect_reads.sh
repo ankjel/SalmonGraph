@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#SBATCH --ntasks=1
+#SBATCH --ntasks=8
 #SBATCH --nodes=1                # Use 1 node
 #SBATCH --job-name=samtools  # sensible name for the job
-#SBATCH --mem=3G                 # Default memory per CPU is 3GB.
+#SBATCH --mem=50G                 # Default memory per CPU is 3GB.
 #SBATCH --output=log-samtools-%j.out
 
 
@@ -22,16 +22,19 @@ do
         region1='ssa05:12773188-127773343' # This depends on the reference
         ind=$(basename $input)
 
-        samtools view -H $input > header.sam # Extract the header to merge with reads later for valid bam
+        samtools view -@ $SLURM_CPUS_ON_NODE -H $input > header.sam # Extract the header to merge with reads later for valid bam
         # First: subset region, second: cat header and region for valid sam, 
         #third: S ignore compability something abot samtools version, b bam output 
-        samtools view $input "$region1" | cat header.sam - | samtools view -Sb - > ${ind}_${region1}.bam
+        samtools view -@ $SLURM_CPUS_ON_NODE $input "$region1" | cat header.sam - | samtools view -@ $SLURM_CPUS_ON_NODE -Sb - > ${ind}_${region1}.bam
         # index new bam file
-        samtools index ${ind}_${region1}.bam
+        samtools index -@ $SLURM_CPUS_ON_NODE ${ind}_${region1}.bam
         # make fasta from new bam file
-        samtools fasta ${ind}_${region1}.bam > prdm9_both_haps/${ind}_${region1}_reads.fa
+        samtools fastq -@ $SLURM_CPUS_ON_NODE ${ind}_${region1}.bam > prdm9_both_haps/${ind}_${region1}_reads.fq
         
         rm ${ind}_${region1}.bam*
 
 done
+
+
+
 

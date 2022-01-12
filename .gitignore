@@ -46,5 +46,10 @@ log-*
 *.log
 *.out
 
-core*
+# Jupyter hub files
+.ipynb_checkpoints
+
+# Bam and cram files
+*.bam
+*.cram
 
