@@ -31,8 +31,9 @@ cd $out_dir
 echo $(pwd)
 
 gfa=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-G5G.out/PRDM9a_znf-candidates_v1_PanSN-spec.fasta.2dd9516.8f341e3.c0b3beb.smooth.gfa
-fasta=/mnt/SCRATCH/ankjelst/data/simon22.fasta
-vcf=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.ssa22.vcf
+
+# Do we really need a vcf?
+#vcf=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.ssa22.vcf
 
 fq1=/mnt/SCRATCH/ankjelst/data/art/sim_r_sim_SV1.fq
 fq2=/mnt/SCRATCH/ankjelst/data/art/sim_r_sim_SV2.fq
@@ -42,10 +43,10 @@ fq2=/mnt/SCRATCH/ankjelst/data/art/sim_r_sim_SV2.fq
 
 
 refHeader=Simon#1#majorityconsensus
-
+ref=
 
 singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools:1.14--hb421002_0 \
-samtools faidx fasta $refHeader > 
+samtools faidx fasta $refHeader > $refHeader.fasta
 
 
 # We need to index our graph
@@ -54,7 +55,10 @@ samtools faidx fasta $refHeader >
 # this fasta is the one the graph is made from
 
 singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg autoindex \
---prefix visorpggb --workflow giraffe --threads 8 --gfa $gfa --ref-fasta $fasta
+--prefix visorpggb --workflow giraffe --threads 8 --gfa $gfa 
+
+# vcf + fasta would be better, but I will try both I guess?
+# for vcf + fasta I will have to: choose a reference, make a fasta with only reference, use vcf from deconstruct (?)
 
 
 # Run giraffe!
@@ -85,13 +89,13 @@ singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg stats -a mapped.gam
 
 echo "Running vg pack:"
 
-singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg pack \
--x $gfa -g mapped.gam -o visorpggb.pack -Q 5 -t $SLURM_CPUS_ON_NODE
+#singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg pack \
+#-x $gfa -g mapped.gam -o visorpggb.pack -Q 5 -t $SLURM_CPUS_ON_NODE
 
 
 # then vg call
 
 echo "Running vg call"
 
-singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg call \
-$gfa --pack visorpggb.pack --ref-fasta $fasta -t $SLURM_CPUS_ON_NODE > genotypes.vcf
+#singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg call \
+#$gfa --pack visorpggb.pack --ref-fasta $fasta -t $SLURM_CPUS_ON_NODE > genotypes.vcf
