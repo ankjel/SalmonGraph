@@ -30,23 +30,23 @@ cd $out_dir
 
 echo $(pwd)
 
-gfa=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-G5G.out/PRDM9a_znf-candidates_v1_PanSN-spec.fasta.2dd9516.8f341e3.c0b3beb.smooth.gfa
-
+gfa=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-PRDM9a_znf-candidates_v1_PanSN-spec.fasta-G20000-k85.out/PRDM9a_znf-candidates_v1_PanSN-spec.fasta.ce77aa4.b921d7e.9799452.smooth.gfa
+fasta=/mnt/SCRATCH/ankjelst/data/prdm9/PRDM9a_znf-candidates_v1_PanSN-spec.fasta
 # Do we really need a vcf?
 #vcf=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.ssa22.vcf
 
-fq1=/mnt/SCRATCH/ankjelst/data/art/sim_r_sim_SV1.fq
-fq2=/mnt/SCRATCH/ankjelst/data/art/sim_r_sim_SV2.fq
+fq1=/mnt/SCRATCH/ankjelst/data/prdm9/prdm9_both_haps/tess.cram_ssa05:12773188-127773343_r1.fq
+fq2=/mnt/SCRATCH/ankjelst/data/prdm9/prdm9_both_haps/tess.cram_ssa05:12773188-127773343_r2.fq
 
 ###########################################
 # Need a fasta with only reference sequence
 
 
 refHeader=Simon#1#majorityconsensus
-ref=
+cat $fasta | grep "^>"$refHeader -A 1 > vgcall_reference.fasta
 
-singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools:1.14--hb421002_0 \
-samtools faidx fasta $refHeader > $refHeader.fasta
+
+ref=vgcall_reference.fasta
 
 
 # We need to index our graph
@@ -98,4 +98,4 @@ echo "Running vg pack:"
 echo "Running vg call"
 
 #singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg call \
-#$gfa --pack visorpggb.pack --ref-fasta $fasta -t $SLURM_CPUS_ON_NODE > genotypes.vcf
+#$gfa --pack visorpggb.pack --ref-fasta $ref -t $SLURM_CPUS_ON_NODE > genotypes.vcf
