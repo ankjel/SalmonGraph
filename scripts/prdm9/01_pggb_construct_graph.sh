@@ -23,7 +23,7 @@ fasta=$1
 #wfmash
 param_s=100
 param_p=95
-param_n=10  #Ideally, you should set this to equal the number of haplotypes in the pangenome.
+param_n=17  #Ideally, you should set this to equal the number of haplotypes in the pangenome.
 param_K=16
 param_i="$(basename $fasta)"
 param_l=10
