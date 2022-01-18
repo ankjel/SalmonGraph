@@ -54,7 +54,7 @@ ref=vgcall_reference.fasta
 
 # this fasta is the one the graph is made from
 
-singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg autoindex \
+singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg autoindex \
 --prefix visorpggb --workflow giraffe --threads 8 --gfa $gfa 
 
 # vcf + fasta would be better, but I will try both I guess?
@@ -69,7 +69,7 @@ echo "Running giraffe"
 
 # Giraffe input is the very VG-specific files created with vg autoindex above.
 
-singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg giraffe \
+singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg giraffe \
 -Z visorpggb.giraffe.gbz -m visorpggb.min -d visorpggb.dist -f $fq1 -f $fq2 > mapped.gam
 
 # https://github.com/vgteam/vg/wiki/Mapping-short-reads-with-Giraffe
@@ -79,7 +79,7 @@ singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg giraffe \
 # Print mapping stats
 #####################
 
-singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg stats -a mapped.gam
+singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg stats -a mapped.gam
 
 
 # Variant calling
@@ -89,13 +89,13 @@ singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg stats -a mapped.gam
 
 echo "Running vg pack:"
 
-singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg pack \
--x $gfa -g mapped.gam -o visorpggb.pack -t $SLURM_CPUS_ON_NODE
+singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg pack \
+-x $gfa -g mapped.gam -o visorpggb.pack -t $SLURM_CPUS_ON_NODE 
 
 
 # then vg call
 
 echo "Running vg call"
 
-singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif vg call \
-$gfa --pack visorpggb.pack --ref-fasta $ref -t $SLURM_CPUS_ON_NODE > genotypes.vcf
+#singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg call \
+#$gfa --pack visorpggb.pack --ref-fasta $ref -t $SLURM_CPUS_ON_NODE > genotypes.vcf
