@@ -21,11 +21,12 @@ date
 ## Parameters
 
 fasta=$1
+haplotypes=$(cat $fasta | grep "^>" | wc -l)
 
 #wfmash
 param_s=100 # segment size, this should only be this small because we have a small graph, for full chromosomes set to 100000
 param_p=95 # percent identity in the wfmash step, including variants. This should not be so strict for this small example
-param_n=13  #Ideally, you should set this to equal the number of haplotypes in the pangenome.
+param_n=$haplotypes  #Ideally, you should set this to equal the number of haplotypes in the pangenome.
 param_K=16 # Kmer size for aligning
 param_i="$(basename $fasta)" 
 param_l=300 # minimum block length filter for mapping. (segments are merged to blocks, default 3*segment-length)
@@ -35,7 +36,7 @@ param_l=300 # minimum block length filter for mapping. (segments are merged to b
 param_k=84 #filter exact matches below this length [default: 29]
 
 #smoothxg
-param_H=13 # number of haplotypes, if different than that set with -n
+param_H=$haplotypes # number of haplotypes, if different than that set with -n
 param_G=20000 # target sequence length for POA, first pass = N, second pass = M [default: 13117,13219]
 
 

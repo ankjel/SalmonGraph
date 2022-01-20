@@ -30,16 +30,29 @@ cd $out_dir
 
 echo $(pwd)
 
-gfa=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-PRDM9a_znf_sig.fasta-G20000-k84.out/PRDM9a_znf_sig.fasta.bfda8cb.eefcd36.008d801.smooth.gfa
-fasta=/mnt/SCRATCH/ankjelst/data/prdm9/PRDM9a_znf_sig.fasta
+fasta=$1 
+pggb_dir=$2
+fqs=$3 #fastq files path+ basename /mnt/SCRATCH/ankjelst/data/prdm9/tess.cram_ssa05:12773150-12773892_all
+
+gfa=$(ls "$pggb_dir"/*.smooth.gfa)
+
 # Do we really need a vcf?
 #vcf=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.ssa22.vcf
 
-fq1=/mnt/SCRATCH/ankjelst/data/prdm9/tess.cram_ssa05:12773150-12773892_all_R1.fq
-fq2=/mnt/SCRATCH/ankjelst/data/prdm9/tess.cram_ssa05:12773150-12773892_all_R2.fq
+fq1="$fqs"_R1.fq
+fq2="$fqs"_R2.fq
 
 # need better solution for defining name and fq when doing this later
 name=tess
+
+echo "fasta:" $fasta
+echo "pggb dir:" $pggb_dir
+echo "fastq dir:" $fqs
+
+echo "gfa:" $gfa
+echo "fq1:" $fq1
+echo "fq2:" $fq2
+echo "name:" $name
 
 # We need to index our graph
 ##################################
@@ -47,7 +60,7 @@ name=tess
 # this fasta is the one the graph is made from
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg autoindex \
---prefix visorpggb --workflow giraffe --threads $SLURM_CPUS_ON_NODE --gfa $gfa 
+--prefix $name --workflow giraffe --threads $SLURM_CPUS_ON_NODE --gfa $gfa 
 
 # vcf + fasta would be better, but I will try both I guess?
 # for vcf + fasta I will have to: choose a reference, make a fasta with only reference, use vcf from deconstruct (?)
@@ -62,7 +75,7 @@ echo "Running giraffe"
 # Giraffe input is the very VG-specific files created with vg autoindex above.
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg giraffe \
--Z visorpggb.giraffe.gbz -m visorpggb.min -d visorpggb.dist -f $fq1 -f $fq2 > mapped.gam
+-Z $name.giraffe.gbz -m $name.min -d $name.dist -f $fq1 -f $fq2 > mapped.gam
 
 # https://github.com/vgteam/vg/wiki/Mapping-short-reads-with-Giraffe
 
@@ -82,7 +95,7 @@ singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg stats -a mapped.gam
 echo "Running vg pack:"
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg pack \
--x $gfa -g mapped.gam -o $namepggb.pack -t $SLURM_CPUS_ON_NODE 
+-x $gfa -g mapped.gam -o $name.pack -t $SLURM_CPUS_ON_NODE 
 
 
 # then vg call
@@ -90,4 +103,4 @@ singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg pack \
 echo "Running vg call"
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg call \
---pack visorpggb.pack -t $SLURM_CPUS_ON_NODE --ref-path "Simon#1#sig" --ref-path "Maxine#1#sig" --sample $name $gfa > simon.vcf maxine.vcf
+--pack $name.pack -t $SLURM_CPUS_ON_NODE --ref-path "Simon#1#sig" --sample $name $gfa > "$name"_simon.vcf

@@ -13,12 +13,15 @@
 #module load SAMtools/1.11-GCC-9.3.0
 # samtools in modules is way too old
 
+crams=$1
+echo "crams:" $crams
 
 cd $SCRATCH/data/prdm9
 mkdir -p prdm9_both_haps
 
-for bam in tess.cram
+for bam in $crams
 do
+        echo $bam
         input=$bam
         region1='ssa05:12773150-12773892' # This depends on the reference- 
         # Øyvind 12773150-12773892 Kristina 12773188-127773343 for simon
@@ -27,7 +30,7 @@ do
         #############################################
         # Find all the reads mapping to our region
         #############################################
-        
+        echo "first step"
         singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools:1.14--hb421002_0 \
         samtools view -@ $SLURM_CPUS_ON_NODE -H $input > header.sam # Extract the header to merge with reads later for valid bam
         # First: subset region, second: cat header and region for valid sam, 
@@ -37,6 +40,7 @@ do
         samtools view -@ $SLURM_CPUS_ON_NODE $input -F 4 "$region1" | cat header.sam - | singularity exec \
         /cvmfs/singularity.galaxyproject.org/s/a/samtools:1.14--hb421002_0 \
         samtools view -@ $SLURM_CPUS_ON_NODE -Sb - > ${ind}_${region1}.bam
+         # -F 4 exclude unmapped reads
         
         # index new bam file
         singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools:1.14--hb421002_0 \
@@ -46,13 +50,14 @@ do
         #########################################################
         # Get all the pairs where one maps to region
         ########################################################
-        
+        echo "second step"
         #Find names of all reads in region
+        singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools:1.14--hb421002_0 \
         samtools view ${ind}_${region1}.bam | awk '{print $1}' > names.txt
         
         #extract all reads mapped and in pairs with one of these names, add heades
         singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools:1.14--hb421002_0 \
-        samtools view -@ $SLURM_CPUS_ON_NODE -F 260 -N names.txt $bam | cat header.sam - | singularity exec \
+        samtools view -@ $SLURM_CPUS_ON_NODE -N names.txt $bam | cat header.sam - | singularity exec \
         /cvmfs/singularity.galaxyproject.org/s/a/samtools:1.14--hb421002_0 \
         samtools view -@ $SLURM_CPUS_ON_NODE -Sb - > ${ind}_${region1}_all.bam
         
