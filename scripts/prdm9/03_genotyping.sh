@@ -34,7 +34,7 @@ fasta=$1
 pggb_dir=$2
 fqs=$3 #fastq files path+ basename /mnt/SCRATCH/ankjelst/data/prdm9/tess.cram_ssa05:12773150-12773892_all
 
-gfa=$(ls "$pggb_dir"/*.smooth.gfa)
+gfa=$(ls "$pggb_dir"*.smooth.gfa)
 
 # Do we really need a vcf?
 #vcf=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.ssa22.vcf
@@ -43,7 +43,10 @@ fq1="$fqs"_R1.fq
 fq2="$fqs"_R2.fq
 
 # need better solution for defining name and fq when doing this later
-name=tess
+name=maxine
+
+# Choose a referance for genotype calling
+refheader="Simon#1#sig"
 
 echo "fasta:" $fasta
 echo "pggb dir:" $pggb_dir
@@ -53,6 +56,7 @@ echo "gfa:" $gfa
 echo "fq1:" $fq1
 echo "fq2:" $fq2
 echo "name:" $name
+echo "referance for genotyping" $refheader
 
 # We need to index our graph
 ##################################
@@ -75,9 +79,10 @@ echo "Running giraffe"
 # Giraffe input is the very VG-specific files created with vg autoindex above.
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg giraffe \
--Z $name.giraffe.gbz -m $name.min -d $name.dist -f $fq1 -f $fq2 > mapped.gam
+--fragment-mean 300 --fragment-stdev 68 -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE > mapped.gam
 
 # https://github.com/vgteam/vg/wiki/Mapping-short-reads-with-Giraffe
+# --fragment-mean 600 --fragment-stdev 68 ?
 
 
 
@@ -95,7 +100,7 @@ singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg stats -a mapped.gam
 echo "Running vg pack:"
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg pack \
--x $gfa -g mapped.gam -o $name.pack -t $SLURM_CPUS_ON_NODE 
+-x $gfa -g mapped.gam -o "$name".pack -t $SLURM_CPUS_ON_NODE 
 
 
 # then vg call
@@ -103,4 +108,4 @@ singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg pack \
 echo "Running vg call"
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg call \
---pack $name.pack -t $SLURM_CPUS_ON_NODE --ref-path "Simon#1#sig" --sample $name $gfa > "$name"_simon.vcf
+-A --pack "$name".pack -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name $gfa > "$name"_simon.vcf
