@@ -48,6 +48,7 @@ log-*
 
 # Jupyter hub files
 .ipynb_checkpoints
+*/.ipynb_checkpoints/*
 
 # Bam and cram files
 *.bam

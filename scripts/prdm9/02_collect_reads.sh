@@ -17,7 +17,7 @@ samtoolssif=/cvmfs/singularity.galaxyproject.org/s/a/samtools:1.14--hb421002_0
 crams=$1
 echo "crams:" $crams
 
-cd $SCRATCH/data/prdm9
+cd $SCRATCH/data/prdm9s
 mkdir -p prdm9_both_haps
 
 for bam in $crams

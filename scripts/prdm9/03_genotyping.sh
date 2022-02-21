@@ -64,7 +64,7 @@ echo "referance for genotyping" $refheader
 # this fasta is the one the graph is made from
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg autoindex \
---prefix $name --workflow giraffe --threads $SLURM_CPUS_ON_NODE --gfa $gfa 
+--request XG --prefix $name --workflow giraffe --threads $SLURM_CPUS_ON_NODE --gfa $gfa 
 
 # vcf + fasta would be better, but I will try both I guess?
 # for vcf + fasta I will have to: choose a reference, make a fasta with only reference, use vcf from deconstruct (?)

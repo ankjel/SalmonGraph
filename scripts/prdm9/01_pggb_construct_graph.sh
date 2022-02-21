@@ -29,7 +29,7 @@ param_p=95 # percent identity in the wfmash step, including variants. This shoul
 param_n=$haplotypes  #Ideally, you should set this to equal the number of haplotypes in the pangenome.
 param_K=16 # Kmer size for aligning
 param_i="$(basename $fasta)" 
-param_l=300 # minimum block length filter for mapping. (segments are merged to blocks, default 3*segment-length)
+param_l=100 # minimum block length filter for mapping. (segments are merged to blocks, default 3*segment-length)
 
 
 #seqwish
@@ -37,8 +37,8 @@ param_k=84 #filter exact matches below this length [default: 29]
 
 #smoothxg
 param_H=$haplotypes # number of haplotypes, if different than that set with -n
-param_G=20000 # target sequence length for POA, first pass = N, second pass = M [default: 13117,13219]
-
+param_G="13117,13219" # target sequence length for POA, first pass = N, second pass = M [default: 13117,13219]
+param_P="1,4,6,2,26,1"
 
 #deconstruct
 #param_V=ssa05:sample.list  
@@ -49,7 +49,7 @@ param_V='Simon:#,Maxine:#'
 
 SCRATCHout=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-$param_i-G$param_G-k$param_k.out
 
-out=pggb-G$param_G.out
+out=pggb-$(basename $fasta).out
 
 ##########
 # Copy input files to tmpdir
@@ -66,13 +66,25 @@ cp $fasta .
 echo "RUN PGGB"
 
 singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif pggb -i $param_i -s $param_s -p $param_p -K $param_K \
--n $param_n -t $SLURM_CPUS_ON_NODE -k $param_k -o $out -G $param_G -V $param_V -L -v -l $param_l
+-n $param_n -t $SLURM_CPUS_ON_NODE -k $param_k -o $out -G $param_G -V $param_V -L -v -l $param_l -P $param_P -H $param_H
+
+
+echo "CHOP GFA"
+
+# vg does not like nodes >1024 bp. We chop the graph ourselves to avoid coordinate inconsistency between mapped file and graph.
+
+odgi=$(ls $out/*.smooth.og)
+fastabase=$(basename "$fasta")
+singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif odgi chop -c 1024 -i $odgi -o "$fastabase"-chop.og
+
+singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif odgi view -i "$fastabase"-chop.og --to-gfa > "$fastabase"-chop.gfa
+
 
 echo "MOVE FILES TO SCRATCH"
 
 mkdir -p $SCRATCHout
 
-mv -v $out/* $SCRATCHout
+mv -v $out/* "$fastabase"-chop.gfa $SCRATCHout
 
 cd ..
 

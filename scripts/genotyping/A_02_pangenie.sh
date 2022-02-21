@@ -53,7 +53,7 @@ echo "Filter vcf"
 # Erik Garrison already wrote one
 
 
-$homedir/tools/rust.sif $homedir/tools/vcfbub -i $deconstructed_vcf --max-level 0 > $filtered_vcf  
+singularity exec $homedir/tools/rust.sif $homedir/tools/vcfbub -i $deconstructed_vcf --max-level 0 > $filtered_vcf  
 
 
 ####################################################
