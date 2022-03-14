@@ -88,7 +88,8 @@ singularity exec $homedir/tools/rust.sif $homedir/tools/vcfbub -i "$deconstructe
 # cat fastq files. Pangenie is k-mer based so will not use the readpair information.
 # and only allowes for one read input in either fastq or fasta format.
 pangenieref="$SCRATCHout"/pggb/ref-2hap.fa
-name=$(basename -s .fa "$pangenieref")-"$depth"
+sample="$SCRATCHout"/pggb/h1-2hap.fa
+name=$(basename -s .fa "$sample")-"$depth"
 echo "cat fastqs"
 fq1="$name"1.fq
 fq2="$name"2.fq

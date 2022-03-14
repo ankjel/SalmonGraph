@@ -10,7 +10,7 @@ source("metrics.R")
 ##################
 # load data
 
-path.vcf <- "/mnt/SCRATCH/ankjelst/sim_pipe/pggb/chop-deconstruct-pggb.fasta.vcf"
+path.vcf <- "/mnt/SCRATCH/ankjelst/sim_pipe/pggb/chop-deconstruct-pggb.fasta.vcf.gz"
 
 vcf <- read_delim(path.vcf, delim = "\t", comment="##") %>% rename("CHROM" = `#CHROM`)
 path.true <- "/mnt/users/ankjelst/MasterScripts/scripts/sim/ssa22variants_tworegions.bed"
@@ -80,3 +80,4 @@ results <- rbind(results, tibble(region = "ssa22:52-62", type = "all", precision
 
 results %>% 
   mutate(F1 = 2*precision*recall/(precision + recall))
+

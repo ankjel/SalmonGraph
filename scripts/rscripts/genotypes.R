@@ -1,15 +1,28 @@
 source("metrics.R")
 
 
-path.true <- "/mnt/SCRATCH/ankjelst/data/ssa22variants.bed"
+path.true <- "/mnt/users/ankjelst/MasterScripts/scripts/sim/ssa22variants_tworegions.bed"
 
 vcf.true <- read_delim(path.true, delim = "\t", comment="#", col_names = c('CHROM', 'START', 'END', 'TYPE', 'SEQUENCE', 'X'))
 
+vcf.path <- "/mnt/SCRATCH/ankjelst/sim_pipe/h1"
 
 
-vcf <- read_delim(path.genotype, delim = "\t", comment="##") %>% 
-mutate(START = POS, END = POS + str_length(REF)) %>% 
-  filter(!(str_length(REF) == 1 & str_length(ALT) == 1))
+i <- 1
+
+for (f in list.files(vcf.path)){
+  new.vcf <- read_delim(str_c(vcf.path, "/", f), delim = "\t", comment="##") %>% 
+    mutate(START = POS, END = POS + str_length(REF)) 
+  if (i == 1){
+    vcf <- new.vcf
+  }else if (sum(vcf$ID == new.vcf$ID)==nrow(vcf)){
+    vcf <- cbind(vcf, new.vcf[,10])
+  }
+  i <- i+1
+}
+
+
+
 
 tol <- 60
 
