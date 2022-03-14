@@ -39,7 +39,7 @@ echo "Running giraffe"
 # Giraffe input is the very VG-specific files created with vg autoindex above.
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg giraffe \
---fragment-mean 400 --fragment-stdev 50 -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE > "$name".gam
+--fragment-mean 300 --fragment-stdev 68 -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE > mapped_38.gam
 
 # https://github.com/vgteam/vg/wiki/Mapping-short-reads-with-Giraffe
 # --fragment-mean 600 --fragment-stdev 68 ?
@@ -49,7 +49,7 @@ singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg giraffe \
 # Print mapping stats
 #####################
 
-singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg stats -a "$name".gam
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg stats -a mapped_38.gam
 
 
 # Variant calling
@@ -60,7 +60,7 @@ singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg stats -a "$name".ga
 echo "Running vg pack:"
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg pack \
--x "$name".giraffe.gbz -g "$name".gam -o "$name".pack -t $SLURM_CPUS_ON_NODE -d > packtable.txt
+-x "$gfa" -g mapped_38.gam -o "$name".pack -t $SLURM_CPUS_ON_NODE -d > packtable.txt
 
 
 # then vg call

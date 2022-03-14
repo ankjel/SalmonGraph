@@ -6,24 +6,27 @@
 #SBATCH --mem=3G                 # Default memory per CPU is 3GB.
 #SBATCH --output=log-giraffe-%j.out
 
+refheader="Simon#1#sige"
 
-gfa=$(ls q)
-refheader="Simon#1#sigextension"
-fragment_mean=255
 
 cd $SCRATCH/prdm9_genotyping.out/test
 
-fq1=$(ls $SCRATCH/prdm9_genotyping.out/maxine/*_R1.fq)
-fq2=$(ls $SCRATCH/prdm9_genotyping.out/maxine/*_R2.fq)
+fq1=$(ls /mnt/SCRATCH/ankjelst/prdm9_genotyping.out/PRDM9a_znf-sig_Simon_10kb_extension_v1.fasta/arnold/*_R1.fq)
+fq2=$(ls /mnt/SCRATCH/ankjelst/prdm9_genotyping.out/PRDM9a_znf-sig_Simon_10kb_extension_v1.fasta/arnold/*_R2.fq)
+
+gfa=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-PRDM9a_znf-sig_Simon_10kb_extension_v1.fasta-G13117,13219-k84.out/PRDM9a_znf-sig_Simon_10kb_extension_v1.fasta-chop.gfa
+
+name=arnold
+
+#Indexing
+#########
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg gbwt -g "$name".giraffe.gbz --gbz-format -G "$gfa" --path-regex "(.*)#(.*)#(.*)" --path-fields _SHC --max-node 0
 
 
-name=maxine
 
-singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg autoindex \
---prefix "$name" --workflow giraffe --threads $SLURM_CPUS_ON_NODE --gfa "$gfa" --gbwt-buffer-size 200 #--request XG 
-
-# vcf + fasta would be better, but I will try both I guess?
-# for vcf + fasta I will have to: choose a reference, make a fasta with only reference, use vcf from deconstruct (?)
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg snarls -T "$name".giraffe.gbz > "$name".snarls
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg index -s "$name".snarls -j "$name".dist -p -b $TMPDIR/$USER "$name".giraffe.gbz
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg minimizer -o "$name".min -d "$name".dist "$name".giraffe.gbz
 
 
 # Run giraffe!
@@ -31,19 +34,9 @@ singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg autoindex \
 
 echo "Running giraffe"
 
-#https://github.com/vgteam/vg/pull/2441
-
-# Giraffe input is the very VG-specific files created with vg autoindex above.
-
 singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg giraffe \
---named-coordinates --fragment-mean 300 --fragment-stdev 90 -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2"  --threads $SLURM_CPUS_ON_NODE --output-basename maxine --hit-cap 5:10:1 --distance-limit 50:400:50 --cluster-score 5:65:20
+--fragment-mean 400 --fragment-stdev 50 -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE -c 2:14:2 -C 250:500:250 -D 50:200:50 --output-basename $name
 
-
-#singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg giraffe \
-#--named-coordinates -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads #$SLURM_CPUS_ON_NODE > mapped_"$fragment_mean".gam
-
-# https://github.com/vgteam/vg/wiki/Mapping-short-reads-with-Giraffe
-# --fragment-mean 600 --fragment-stdev 68 ?
 
 
 
@@ -55,30 +48,19 @@ do
     
     singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg stats -a $file
     
+
+    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg pack \
+    -x "$gfa" -g "$file" -o "$file".pack -t "$SLURM_CPUS_ON_NODE"
+
+
+    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg call \
+    --pack "$file".pack -t "$SLURM_CPUS_ON_NODE" --ref-path "$refheader" --sample "$name" -r -a -A "$name".snarls "$gfa" > "$name"_"$file".vcf
+
 done
-
-gam=maxine-D300-c7-C500-F0.9-M1-e800-a8-s50-u0.3-w20-v1.gam
-
-# Variant calling
-##################
-
-#  First vg pack because vg call requires a .pack file 
-
-echo "Running vg pack:"
-
-singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg pack \
--x "$gfa" -g $gam -o "$name".pack -t "$SLURM_CPUS_ON_NODE"
-
-singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg snarls "$gfa" > graph.snarls
-
-# then vg call
-
-echo "Running vg call"
-
-singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg call \
---pack "$name".pack -t "$SLURM_CPUS_ON_NODE" --ref-path "$refheader" --sample "$name" -r graph.snarls "$gfa" > "$name"_"$fragment_mean".vcf
 
 
 echo "FINISHED genotyping"
 
 date
+
+

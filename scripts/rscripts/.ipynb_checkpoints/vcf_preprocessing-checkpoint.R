@@ -1,19 +1,25 @@
 
 library(tidyverse)
+
+# this script will make the bed-file with SVs to be inserted into
+# chr 22 to make up our simulated data set
+
 path.vcf <- "/mnt/SCRATCH/ankjelst/data/eu_merged_iris_no_simon.vcf"
 
 out.file <- "/mnt/SCRATCH/ankjelst/data/ssa22variants.bed"
 
+# read our SV library vcf
 vcf <- readr::read_tsv(path.vcf, col_names = c("chrom", "pos", "ID", 
                                            "ref", "alt", "qual", 
                                            "filter", "info", "format", 
                                            "alto"), comment = "#") %>% 
-  filter(chrom == "ssa22")
+  filter(chrom == "ssa22") # leave out all variants not on chromosome 22
 
-info <- c("SVTYPE", NA, "END", "SVLEN")
+info <- c("SVTYPE", NA, "END", "SVLEN") # info column tags
 
 vcf.filtered <- vcf %>% 
-  separate(info, into = info, sep=";", extra="drop", remove=FALSE) %>% 
+# the next line will separate the vcf-info field into separate columns for each tag
+  separate(info, into = info, sep=";", extra="drop", remove=FALSE) %>%  
   mutate(SVTYPE = str_remove(SVTYPE, pattern = "SVTYPE="),
          SVLEN = as.numeric(str_remove(SVLEN, pattern = "SVLEN=")),
          END = as.numeric(str_remove(END, pattern = "END="))) #%>% filter(pos > 14000000, END < 24000000)

@@ -8,9 +8,12 @@ vcf.true <- read_delim(path.true, delim = "\t", comment="#", col_names = c('CHRO
 
 path.genotype <- "/mnt/SCRATCH/ankjelst/data/giraffe/genotypes.vcf"
 
-vcf <- read_delim(path.genotype, delim = "\t", comment="#", col_names = c('CHROM', 'POS', 'ID', 'REF', 'ALT','QUAL',  'FILTER', 'INFO', 'FORMAT')) %>% 
-  mutate(START = POS, END = POS + str_length(REF))
-
+#vcf <- read_delim(path.genotype, delim = "\t", comment="#", col_names = c('CHROM', 'POS', 'ID', 'REF', 'ALT','QUAL',  'FILTER', 'INFO', 'FORMAT')) %>% 
+# mutate(START = POS, END = POS + str_length(REF))
+vcf <- readr::read_tsv(path.vcf, col_names = c("chrom", "pos", "ID", 
+                                           "ref", "alt", "qual", 
+                                           "filter", "info", "format", 
+                                           "alto"), comment = "#")
 
 tol <- 20
 

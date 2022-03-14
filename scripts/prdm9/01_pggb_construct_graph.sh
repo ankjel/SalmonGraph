@@ -54,9 +54,9 @@ out=pggb-$(basename $fasta).out
 ##########
 # Copy input files to tmpdir
 
-mkdir -p $TMPDIR/$USER #Not all nodes my TMP dir exist
+mkdir -p $TMPDIR/$USER/$SLURM_JOBID #Not all nodes my TMP dir exist
 
-cd $TMPDIR/$USER
+cd $TMPDIR/$USER/$SLURM_JOBID
 
 cp $fasta .
 
@@ -75,6 +75,7 @@ echo "CHOP GFA"
 
 odgi=$(ls $out/*.smooth.og)
 fastabase=$(basename "$fasta")
+
 singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif odgi chop -c 1024 -i $odgi -o "$fastabase"-chop.og
 
 singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif odgi view -i "$fastabase"-chop.og --to-gfa > "$fastabase"-chop.gfa
@@ -92,11 +93,11 @@ echo "DELETE TMP-FILES"
 
 ls $TMPDIR/$USER
 
-rm -r $TMPDIR/$USER/*
+rm -r $TMPDIR/$USER/$SLURM_JOBID
 
 echo "AFTER deleting"
 
-ls $TMPDIR/$USER
+ls $TMPDIR/$USER/
 
 echo "FINISHED"
 

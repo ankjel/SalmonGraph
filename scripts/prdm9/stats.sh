@@ -7,5 +7,5 @@
 #SBATCH --output=log-samtools-%j.out
 
 singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools:1.12--h9aed4be_1 \
-samtools stats -@ $SLURM_CPUS_ON_NODE $SCRATCH/data/prdm9/crams/maxine.cram > $SCRATCH/data/prdm9/maxine.stats
+samtools stats -@ $SLURM_CPUS_ON_NODE $SCRATCH/data/crams/maxine.cram > $SCRATCH/data/prdm9/maxine.stats
 

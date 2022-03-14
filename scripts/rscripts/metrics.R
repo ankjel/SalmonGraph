@@ -41,7 +41,7 @@ false.positive <- function(true.vcf, predicted.vcf, tolerance=0){
   
   # How many of the predicted positions are true (+- threshold)
   idx.start <- compare.pos(predicted.vcf$START, true.vcf$START, tolerance)  
-  idx.end <- compare.pos( predicted.vcf$END, true.vcf$END, tolerance)
+  idx.end <- compare.pos(predicted.vcf$END, true.vcf$END, tolerance)
   idx <- idx.start == TRUE & idx.end == TRUE # We need both end and start positions to be correct
   
   # sum number of predicted positions not true, also known as false positives.
@@ -54,7 +54,7 @@ false.negative <- function(true.vcf, predicted.vcf, tolerance=0){
   # Input tibble with start and end columns
   
   # find true positive
-  # how many of the true postions are predicter
+  # how many of the true postions are not found in graph vcf
   idx.start <- compare.pos(true.vcf$START, predicted.vcf$START, tolerance)
   idx.end <- compare.pos(true.vcf$END, predicted.vcf$END, tolerance)
   idx <- idx.start == TRUE & idx.end == TRUE

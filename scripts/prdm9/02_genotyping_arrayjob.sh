@@ -32,10 +32,24 @@ cramdir=/mnt/SCRATCH/ankjelst/data/crams
 
 
 ########## For graph with only maxine and Simon AND extensions
-refheader="Simon#1#sige" # choose one haplotype to be the reference when calling genotypes. This must be a path in the gfa.
-pggb_out=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-PRDM9a_znf-sig_Simon_10kb_extension_simmax.fasta-G13117,13219-k84.out
-fasta=/mnt/SCRATCH/ankjelst/data/prdm9/PRDM9a_znf-sig_Simon_10kb_extension_simmax.fasta # the fasta which we made the graph with
+#refheader="Simon#1#sige" # choose one haplotype to be the reference when calling genotypes. This must be a path in the gfa.
+#pggb_out=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-PRDM9a_znf-sig_Simon_10kb_extension_simmax.fasta-G13117,13219-k84.out
+#fasta=/mnt/SCRATCH/ankjelst/data/prdm9/PRDM9a_znf-sig_Simon_10kb_extension_simmax.fasta # the fasta which we made the graph with
 
+########## For graph with only klopp and Simon AND extensions
+#refheader="Simon#1#sige" # choose one haplotype to be the reference when calling genotypes. This must be a path in the gfa.
+#pggb_out=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-PRDM9a_znf-sig_Simon_10kb_extension_klopp.fasta-G13117,13219-k84.out
+#fasta=/mnt/SCRATCH/ankjelst/data/prdm9/PRDM9a_znf-sig_Simon_10kb_extension_klopp.fasta # the fasta which we made the graph wit
+
+########## For graph with only arnold and Simon AND extensions
+#refheader="Simon#1#sige" # choose one haplotype to be the reference when calling genotypes. This must be a path in the gfa.
+#pggb_out=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-PRDM9a_znf-sig_Simon_10kb_extension_arnold.fasta-G13117,13219-k84.out
+#fasta=/mnt/SCRATCH/ankjelst/data/prdm9/PRDM9a_znf-sig_Simon_10kb_extension_arnold.fasta # the fasta which we made the graph wit
+
+########## For graph with extension and with all haplotypes except Simon#2
+refheader="Simon#1#sige" # choose one haplotype to be the reference when calling genotypes. This must be a path in the gfa.
+pggb_out=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-PRDM9a_znf-sig_Simon_10kb_extension_nos2.fasta-G13117,13219-k84.out
+fasta=/mnt/SCRATCH/ankjelst/data/prdm9/PRDM9a_znf-sig_Simon_10kb_extension_nos2.fasta # the fasta which we made the graph wit
 
 
 
