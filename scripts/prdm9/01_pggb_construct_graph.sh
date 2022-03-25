@@ -29,7 +29,7 @@ param_p=95 # percent identity in the wfmash step, including variants. This shoul
 param_n=$haplotypes  #Ideally, you should set this to equal the number of haplotypes in the pangenome.
 param_K=16 # Kmer size for aligning
 param_i="$(basename $fasta)" 
-param_l=100 # minimum block length filter for mapping. (segments are merged to blocks, default 3*segment-length)
+param_l=300 # minimum block length filter for mapping. (segments are merged to blocks, default 3*segment-length)
 
 
 #seqwish
@@ -44,7 +44,7 @@ param_P="1,4,6,2,26,1"
 #param_V=ssa05:sample.list  
 #OBSOBS the reference for the vcf here
 #specify a set of VCFs to produce with SPEC = [REF:SAMPLE_LIST_FILE] the paths matching ^REF are used as a reference
-param_V='Simon:#,Maxine:#'
+param_V='Simon2:#'
 
 
 SCRATCHout=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-$param_i-G$param_G-k$param_k.out

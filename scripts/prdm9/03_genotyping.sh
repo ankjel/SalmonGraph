@@ -15,18 +15,20 @@
 ###########################
 
 
-# Prep
+# Prep3
 ##################################
 
-out_dir=/mnt/SCRATCH/ankjelst/data/giraffe/prdm9
+outdir=/mnt/SCRATCH/ankjelst/data/prdm9
 
-if [ ! -d $out_dir ]
+if [ ! -d $outdir ]
 then
-mkdir $out_dir
+mkdir $outdir
 fi
 
-# cd to where I want the vg autoindex output
-cd $out_dir
+#tmpdir
+tmpdir="$TMPDIR"/"$USER"/job-"$SLURM_JOBID" # one tmpdir for each 
+mkdir -p "$tmpdir"
+cd "$tmpdir"
 
 echo $(pwd)
 
@@ -34,19 +36,15 @@ fasta=$1
 pggb_dir=$2
 fqs=$3 #fastq files path+ basename /mnt/SCRATCH/ankjelst/data/prdm9/tess.cram_ssa05:12773150-12773892_all
 
-gfa=$(ls "$pggb_dir"*.smooth.gfa)
-
-# Do we really need a vcf?
-#vcf=/mnt/SCRATCH/ankjelst/data/pggb-v020-G5G-k85.out/mergedVISOR.fasta.2dd9516.b921d7e.8053ffa.smooth.ssa22.vcf
+gfa=$(ls "$pggb_dir"/*chop.gfa)
 
 fq1="$fqs"_R1.fq
 fq2="$fqs"_R2.fq
 
-# need better solution for defining name and fq when doing this later
-name=maxine
+name=$(basename $fq1 _ssa05:12773150-12773892_R1.fq)
 
 # Choose a referance for genotype calling
-refheader="Simon#1#sig"
+refheader='Simon2#2#sige'
 
 echo "fasta:" $fasta
 echo "pggb dir:" $pggb_dir
@@ -58,54 +56,11 @@ echo "fq2:" $fq2
 echo "name:" $name
 echo "referance for genotyping" $refheader
 
-# We need to index our graph
-##################################
+echo "genotype"
+/mnt/users/ankjelst/MasterScripts/scripts/prdm9/genotyping-odgi.sh "$name" "$gfa" "$refheader" "$fq1" "$fq2"
 
-# this fasta is the one the graph is made from
+mv *.vcf "$outdir"
 
-singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg autoindex \
---request XG --prefix $name --workflow giraffe --threads $SLURM_CPUS_ON_NODE --gfa $gfa 
+cd ..
 
-# vcf + fasta would be better, but I will try both I guess?
-# for vcf + fasta I will have to: choose a reference, make a fasta with only reference, use vcf from deconstruct (?)
-
-
-# Run giraffe!
-#######################
-
-echo "Running giraffe"
-
-
-# Giraffe input is the very VG-specific files created with vg autoindex above.
-
-singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg giraffe \
---fragment-mean 300 --fragment-stdev 68 -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE > mapped.gam
-
-# https://github.com/vgteam/vg/wiki/Mapping-short-reads-with-Giraffe
-# --fragment-mean 600 --fragment-stdev 68 ?
-
-
-
-# Print mapping stats
-#####################
-
-singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg stats -a mapped.gam
-
-
-# Variant calling
-##################
-
-#  First vg pack because vg call requires a .pack file 
-
-echo "Running vg pack:"
-
-singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg pack \
--x $gfa -g mapped.gam -o "$name".pack -t $SLURM_CPUS_ON_NODE 
-
-
-# then vg call
-
-echo "Running vg call"
-
-singularity exec /mnt/users/ankjelst/tools/vg_v1.37.0.sif vg call \
--A --pack "$name".pack -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name $gfa > "$name"_simon.vcf
+rm -r "$tmpdir"

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --array=1-4%2
+#SBATCH --array=1-4 # 1-10%5 only run 5 at a time
 #SBATCH --ntasks=8
 #SBATCH --nodes=1
 #SBATCH --mem=99G
@@ -94,6 +94,8 @@ echo "cat fastqs"
 fq1="$name"1.fq
 fq2="$name"2.fq
 
+
+
 cat $fq1 $fq2 > reads.fq
 
 #######################
@@ -102,7 +104,7 @@ cat $fq1 $fq2 > reads.fq
 
 echo "Run pangenie"
 
-$homedir/tools/pangenie/build/src/PanGenie -i reads.fq -r "$pangenieref" -v filtered.vcf -t $SLURM_CPUS_ON_NODE -j $SLURM_CPUS_ON_NODE -o pangenie
+$homedir/tools/pangenie/build/src/PanGenie -i reads.fq -r "$pangenieref" -v filtered.vcf -t $SLURM_CPUS_ON_NODE -j $SLURM_CPUS_ON_NODE -o pangenie -s "$name"
 
 ##########################
 # resolve nested genotypes

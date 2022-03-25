@@ -3,9 +3,8 @@
 name=$1
 gfa=$2
 refheader=$3
-
-fq1=$(ls *_R1.fq)
-fq2=$(ls *_R2.fq)
+fq1=$4
+fq2=$5
 
 
 
@@ -19,7 +18,7 @@ fq2=$(ls *_R2.fq)
 #singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif odgi chop -c 1024 -i $odgi -o new.og
 #singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif odgi view -i new.og --to-gfa > new.gfa
 
-
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg deconstruct -p 'Simon2#2#sige' -e -a -t $SLURM_CPUS_ON_NODE $gfa > deconstructed.vcf
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg gbwt -g "$name".giraffe.gbz --gbz-format -G "$gfa" --path-regex "(.*)#(.*)#(.*)" --path-fields _SHC --max-node 0
 
@@ -39,7 +38,7 @@ echo "Running giraffe"
 # Giraffe input is the very VG-specific files created with vg autoindex above.
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg giraffe \
---fragment-mean 400 --fragment-stdev 50 -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE > "$name".gam
+--fragment-mean 400 --fragment-stdev 75 -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE > "$name".gam
 
 # https://github.com/vgteam/vg/wiki/Mapping-short-reads-with-Giraffe
 # --fragment-mean 600 --fragment-stdev 68 ?
@@ -68,4 +67,8 @@ singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg pack \
 echo "Running vg call"
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg call \
--a -A --pack "$name".pack -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name "$gfa" > "$name"_simon_v2.vcf
+-a -A --pack "$name".pack  -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name "$gfa" > "$name"_simon_all.vcf
+
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg call \
+--pack "$name".pack -v deconstructed.vcf -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name "$gfa" > "$name"_simon.vcf
+

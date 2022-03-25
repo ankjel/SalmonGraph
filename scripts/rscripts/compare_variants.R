@@ -3,7 +3,7 @@ library(tidyverse)
 
 
 
-source("metrics.R")
+source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/metrics.R")
 
 # I will use functions defined in the script sourced above
 
@@ -79,5 +79,5 @@ results <- rbind(results, tibble(region = "ssa22:52-62", type = "all", precision
 
 
 results %>% 
-  mutate(F1 = 2*precision*recall/(precision + recall))
+  mutate(F1 = 2*precision*recall/(precision + recall)) -> final
 

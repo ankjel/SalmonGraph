@@ -82,7 +82,11 @@ echo "collect reads"
 /mnt/users/ankjelst/MasterScripts/scripts/prdm9/collect_more_reads.sh "$cram" "$outdir"
 
 echo "genotype"
-/mnt/users/ankjelst/MasterScripts/scripts/prdm9/genotyping-odgi.sh "$name" "$gfa" "$refheader"
+
+fq1=$(ls *_R1.fq)
+fq2=$(ls *_R2.fq)
+
+/mnt/users/ankjelst/MasterScripts/scripts/prdm9/genotyping-odgi.sh "$name" "$gfa" "$refheader" "$fq1" "$fq2"
 
 #/mnt/users/ankjelst/MasterScripts/scripts/prdm9/pangenie.sh "$pggb_out" "$fasta"
 

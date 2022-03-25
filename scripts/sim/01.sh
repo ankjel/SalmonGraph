@@ -2,7 +2,7 @@
 #SBATCH --ntasks=8
 #SBATCH --nodes=1                # Use 1 node
 #SBATCH --job-name=pggb  # sensible name for the job
-#SBATCH --mem=99G 
+#SBATCH --mem=50G 
 #SBATCH --partition=smallmem
 #SBATCH --output=log-pggb-%j.log
 #SBATCH --constraint="avx2" # IMPOTATANT!!! PGGB jobs will fail without this
@@ -88,8 +88,11 @@ singularity exec "$homedir"/tools/pggb-v020.sif odgi chop -c 1024 -i $odgi -o "$
 singularity exec "$homedir"/tools/pggb-v020.sif odgi view -i "$fastabase"-chop.og --to-gfa > "$fastabase"-chop.gfa
 singularity exec "$homedir"/tools/vg_v1.38.0.sif vg deconstruct -p "ref#1#ssa22" -H "#" -a -e "$fastabase"-chop.gfa > chop-deconstruct-"$fasta".vcf
 
+singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools\:1.14--hb421002_0 bgzip chop-deconstruct-"$fasta".vcf
 
-cp *-chop.gfa chop-deconstruct-* *.fa *.fasta *.bed "$SCRATCHout" 
+singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools\:1.14--hb421002_0 tabix -p vcf chop-deconstruct-"$fasta".vcf.gz
+
+cp *-chop.gfa chop-deconstruct-* *.fa *.fasta "$pggbout"/*.gfa "$SCRATCHout" 
 
 cd ..
 rm -r $TMPout
