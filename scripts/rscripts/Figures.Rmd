@@ -1,0 +1,213 @@
+---
+title: "Plots"
+author: "Anna S. Kjelstrup"
+date: "5 4 2022"
+output: html_document
+---
+
+
+# Introduction
+
+
+
+
+# Methods
+
+Do I have to include how the references were assembled?
+Should I discuss parameters?
+
+### Simulated data set
+
+- Why we chose the two specific regions
+
+- How we selected SVs to insert into new haplotype
+
+- Read simulation
+
+###  Graph construction
+
+- PGGB - Is this where I explain the pggb tools algorithms briefly? What about parameters?
+
+
+### Evaluation of graph
+
+- Visualisation of graph 
+
+- How we compare SVs inserted to SVs found with vg deconstruct
+
+###  Genotyping VG
+
+- VG giraffe - Again, how much detail?
+
+
+- VG call
+
+###  Genotyping Pangenie 
+
+Maybe same paragraph as vg
+Pangenie
+
+Should I mention how the tools are obtained or/and version number?
+
+### PRDM9 zn-finger repeat graph constuction
+
+### PRDM9 zn-finger genotyping and evaluation 
+
+
+
+# Results and discussion
+
+### SV detection
+
+- SV length distrobution -FIGURE
+
+```{r}
+
+
+```
+
+
+
+```{r message=FALSE, warning=FALSE}
+source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/genotypes.R")
+
+labels <- c("Insertions", "Deletions")
+names(labels) <- c("insertion", "deletion")
+rects <- data.frame(start=c(14000000, 52000000), end=c(24000000,62000000), group=seq_along(c(14000000, 52000000)))
+
+vcf.true %>% 
+  mutate(length = ifelse(TYPE == "deletion", END-START, str_length(SEQUENCE)),
+         region = ifelse(START > 24000000, "A", "B")) %>%
+  ggplot(aes(x=START, color=TYPE)) + geom_freqpoly(binwidth=1000000)+ 
+  
+  theme_minimal()+ 
+  theme(legend.position="none",  axis.title.x = element_blank(), axis.text.x = element_blank()) + labs(y = "Count")+
+  
+  scale_x_continuous(breaks = seq(0, 60000000, by = 10000000), limits = c(-1000000, 64000000), labels = c("0Mbp", "10Mbp", "20Mbp", "30Mbp", "40Mbp", "50Mbp", "60Mbp"))+
+  
+  scale_color_brewer(palette = "Dark2") +
+  
+  facet_wrap(vars(TYPE), scales = "free_y", ncol = 1, labeller=labeller(TYPE=labels))+
+  geom_rect(data=rects, inherit.aes=FALSE, aes(xmin=start, xmax=end, ymin=-Inf,
+                ymax=Inf, group=group), color="transparent", fill="orange", alpha=0.1) -> p1
+
+
+```
+
+
+
+
+```{r}
+read_tsv("/mnt/SCRATCH/kristenl/circos/trf_count.bed", col_names = c("chrom", "start.bin", "end.bin", "rep")) %>% 
+  filter(chrom == "ssa22") -> rep.bed
+
+col3 <- RColorBrewer::brewer.pal(3, "Dark2")[3] 
+p2 <- ggplot(rep.bed, aes(y = rep, x = start.bin, width = 1000000)) +
+  
+  geom_col(fill = col3) + labs(x = "Position in chromosome 22", y = "Count") +
+  
+  theme_minimal() + scale_x_continuous(breaks = seq(0, 60000000, by = 10000000), limits = c(-1000000, 64000000), labels = c("0Mbp", "10Mbp", "20Mbp", "30Mbp", "40Mbp", "50Mbp", "60Mbp")) + 
+  geom_rect(data=rects, inherit.aes=FALSE, aes(xmin=start, xmax=end, ymin=-Inf, ymax=Inf, group=group), color="transparent", fill="orange", alpha=0.1)
+
+```
+
+
+
+```{r}
+library(cowplot)
+
+
+plot_grid(p1, p2, ncol = 1, labels = c("A", "B"), 
+          rel_heights = c(4, 1), align = "v", label_size = 10)
+
+
+```
+
+
+```{r message=FALSE, warning=FALSE}
+source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/compare_parameters.R")
+
+G.tbl %>% 
+  mutate(grp = "G", G = str_extract(file, pattern= "[0-9]*,[0-9]*")) %>% 
+  ggplot(aes(x = factor(G, levels = c("3079,3559", "7919,8069", "13117,13219", "18100,18200", "25000,25100")), y = f1, group = grp)) + geom_point() + geom_line()
+
+```
+
+```{r}
+S.tbl %>% 
+  mutate(grp = "S", S = as.numeric(str_extract(file, pattern= "[0-9]{4,7}"))) %>% 
+  ggplot(aes(x = factor(S), y = f1, group = grp)) + geom_point() + geom_line()
+```
+
+```{r}
+library(ggrepel)
+```
+
+```{r}
+
+G.tbl <- mutate(G.tbl, idx = as.numeric(str_extract(file, "[0-9]{4}")))
+
+G.times <- filter(time.tbl, param == "G_param") %>% mutate(idx = as.numeric(str_extract(param.value, "[0-9]{4}")))
+  
+full_join(G.tbl, G.times, by = "idx") %>% 
+  mutate(param.value = str_extract(file, pattern=("[0-9]*,[0-9]*")),
+         minutes = runtime_seconds/60) %>% 
+  ggplot(aes(x = minutes, y = f1)) + geom_point() + geom_text_repel(aes(label = param.value),segment.color = 'grey50', arrow = T)
+
+```
+
+
+
+- Visualisation of graph ?
+- F1 score for different regions and types of SVs
+
+```{r message=FALSE, warning=FALSE}
+source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/compare_variants.R")
+
+final
+
+```
+
+
+
+### SV genotyping
+
+ - Precision for each tools for each depth - FIGURE
+ 
+ 
+```{r}
+rbind(pg, vg) %>% 
+  mutate(depth = as.integer(depth),
+         TYPE = ifelse(TYPE == "deletion", "Deletions", "Insertions")) %>% 
+  ggplot(aes(x = depth, y = precision, color = tool, group = tool)) + geom_line() + facet_wrap(vars(TYPE)) +
+  scale_color_brewer(palette = "Dark2")+ theme_minimal()
+```
+
+
+### Zn-finger repeat
+
+
+```{r message=FALSE, paged.print=FALSE}
+source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/compare_prdm9znf.R")
+
+ggplot(truth, aes(x = name, y = nznf)) + 
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(title = "True")
+
+```
+
+
+```{r}
+
+called %>% 
+  mutate(idx = row_number()) %>% 
+  ggplot(aes(x = str_c(name, idx), y = nznf)) + 
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(title = "called")
+```
+
+
+
+## Further work
