@@ -60,3 +60,9 @@ core.*
 *.fasta
 *.vcf
 *.txt
+
+# Output
+*.html
+*.png
+*.pdf
+
