@@ -51,7 +51,7 @@ haplotypes=$(cat "$fasta" | grep "^>" | wc -l)
 
 #wfmash
 param_s=100000 # segment size, this should only be this small because we have a small graph, for full chromosomes set to 100000
-param_p=95 # percent identity in the wfmash step, including variants. This should not be so strict for this small example
+param_p=98 # percent identity in the wfmash step, including variants. This should not be so strict for this small example
 param_n=$haplotypes  #Ideally, you should set this to equal the number of haplotypes in the pangenome.
 param_K=16 # Kmer size for aligning
 param_i="$(basename $fasta)" 
@@ -75,7 +75,7 @@ pggbout=pggb.out
 echo "RUN PGGB"
 
 singularity exec "$homedir"/tools/pggb-v020.sif pggb -i $param_i -s $param_s -p $param_p -K $param_K \
--n $param_n -t $SLURM_CPUS_ON_NODE -k $param_k -o $pggbout -G $param_G -V $param_V -l $param_l
+-n $param_n -t $SLURM_CPUS_ON_NODE -k $param_k -o $pggbout -G $param_G -V $param_V #-l $param_l
 
 
 #chop graph
