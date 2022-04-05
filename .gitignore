@@ -58,3 +58,5 @@ core.*
 *.fa
 *.bed
 *.fasta
+*.vcf
+*.txt
