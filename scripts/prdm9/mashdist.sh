@@ -9,40 +9,22 @@
 
 #############
 # To find ideal -s option for pggb we use mash dist to establish the typical level of divergence
-# (from pggb readme)
-# This script will find mash distance between some of the sequences in the fasta with all prdm9 haplotypes.
+
 #############
 
-fasta=$1
-headers="Simon#1#majorityconsensus Maxine#2#zfsig Arnold#1#zfsig" # headers of sequences to compare
-
-out=$TMPDIR/$USER
-mkdir -p $out #Not all nodes my TMP dir exist
-cd $out
+fasta=$SCRATCH/data/prdm9/PRDM9a_zf_sig_original.fasta
 
 
-########
-# make fasta files for each header
-
-for i in $headers
-do 
-    singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools\:1.14--hb421002_0 samtools faidx $fasta $i > $i.fasta
-done
-
+singularity exec /cvmfs/singularity.galaxyproject.org/m/a/mash:2.3--he348c14_1 mash triangle -p $SLURM_CPUS_ON_NODE $fasta > mash-$(basename "$fasta" .fasta).txt
 
 #######
-# find distance
+# find distance max dist
 
-fastas=$out/$(ls *.fasta)
+echo "Max dist:"
 
-singularity exec /cvmfs/singularity.galaxyproject.org/m/a/mash:2.3--he348c14_1 mash dist $fastas
+sed 1,1d mash-PRDM9a_zf_sig_original.txt | tr '\t' '\n' | grep '^[A-Z]' -v | LC_ALL=C sort -g -k 1nr | uniq | head -n 1
 
-#########
-# Clean out tmpdir
-
-rm -r $out/*
-
-echo finished
 
     
-
+# For prdm9 0.0112932
+# 100-0.0112932*100 = ca 98.9 
