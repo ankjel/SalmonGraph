@@ -55,12 +55,20 @@ false.negative <- function(true.vcf, predicted.vcf, tolerance=0){
   
   # find true positive
   # how many of the true postions are not found in graph vcf
+#  idx.start <- compare.pos(true.vcf$START, predicted.vcf$START, tolerance)
+ # idx.end <- compare.pos(true.vcf$END, predicted.vcf$END, tolerance)
+  #idx <- idx.start == TRUE & idx.end == TRUE
+  
+  
+  #FN <- sum(!idx)   
+  
   idx.start <- compare.pos(true.vcf$START, predicted.vcf$START, tolerance)
   idx.end <- compare.pos(true.vcf$END, predicted.vcf$END, tolerance)
   idx <- idx.start == TRUE & idx.end == TRUE
   
+  TP <- sum(idx)
   
-  FN <- sum(!idx)   
+  FN <- nrow(true.vcf)-TP
   return(FN)
 }
 
