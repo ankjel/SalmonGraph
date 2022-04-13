@@ -69,7 +69,7 @@ echo "referance for genotyping" $refheader
 echo "genotype"
 /mnt/users/ankjelst/MasterScripts/scripts/prdm9/genotyping-odgi-test.sh "$name" "$gfa" "$refheader" "$fq1" "$fq2"
 
-mv *.txt *.vcf *.gam *.giraffe.gbz *.pack "$outdir"
+mv *.txt *.vcf "$outdir"
 
 cd ..
 

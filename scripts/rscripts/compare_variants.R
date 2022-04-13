@@ -3,7 +3,7 @@ library(tidyverse)
 
 
 
-source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/metrics.R")
+source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/new_metrics.R")
 
 # I will use functions defined in the script sourced above
 
@@ -43,6 +43,8 @@ tp.df <- true.positive.df(true.vcf = vcf.true, predicted.vcf = vcf, tolerance = 
 
 
 
+
+
 #####################
 # divide into del and ins
 
@@ -54,7 +56,6 @@ del <- filter(vcf, type == "deletion")
 true.ins <- filter(vcf.true, TYPE == "insertion")
 true.del <- filter(vcf.true, TYPE == "deletion")
 
-tol = 20
 rbind(tibble(region = "ssa22", type = "del", precision = precision(true.del, del, tol), recall = recall(true.del, del, tol)),
 tibble(region = "ssa22", type = "ins", precision = precision(true.ins, ins, tol), recall = recall(true.ins, ins, tol))) -> results
 
@@ -80,4 +81,5 @@ results <- rbind(results, tibble(region = "ssa22:52-62", type = "all", precision
 
 results %>% 
   mutate(F1 = 2*precision*recall/(precision + recall)) -> final
+
 

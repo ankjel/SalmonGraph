@@ -47,7 +47,7 @@ echo "RUN PGGB"
 
 echo -e "S_param\truntime_seconds" > S_runtime.txt
 
-for param_s in 5000 20000 50000 100000 20000
+for param_s in 5000 10000 20000 50000 100000 200000
 do
     start=`date +%s` # time pggb run
     singularity exec "$homedir"/tools/pggb-v020.sif pggb -i $param_i -s $param_s -p $param_p -K $param_K \

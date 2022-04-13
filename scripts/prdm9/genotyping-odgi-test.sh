@@ -44,7 +44,7 @@ echo "Mapping: giraffe"
 # Giraffe input is the very VG-specific files created with vg autoindex above.
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg giraffe \
--Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE > "$name".gam
+-Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --report-name "$name"-report.txt --threads $SLURM_CPUS_ON_NODE > "$name".gam
 
 # https://github.com/vgteam/vg/wiki/Mapping-short-reads-with-Giraffe
 # --fragment-mean 600 --fragment-stdev 68 ?
@@ -74,7 +74,43 @@ echo "Running vg call -a -A"
 
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg call \
--a -A --pack "$name".pack  -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name "$gfa" > "$name"_simon_alt.vcf
+-a -A --pack "$name".pack  -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name "$gfa" > "$name"_simon.vcf
+
+####################################################
+# Do the same just without fragment size estimation
+
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg giraffe \
+--fragment-mean 400  --fragment-stdev 50 -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --report-name "$name"-report.txt --threads $SLURM_CPUS_ON_NODE > "$name"-frgm.gam
+
+# https://github.com/vgteam/vg/wiki/Mapping-short-reads-with-Giraffe
+# --fragment-mean 600 --fragment-stdev 68 ?
+
+
+
+# Print mapping stats
+#####################
+
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg stats -a "$name"-frgm.gam
+
+
+# Variant calling
+##################
+
+#  First vg pack because vg call requires a .pack file q
+
+echo "Running vg pack:"
+
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg pack \
+-x "$name".giraffe.gbz -g "$name"-frgm.gam -o "$name"-frgm.pack -t $SLURM_CPUS_ON_NODE 
+
+
+# then vg call
+
+echo "Running vg call -a -A"
+
+
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg call \
+-a -A --pack "$name"-frgm.pack  -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample "$name"-frgm "$gfa" > "$name"_simon_frgm.vcf
 
 
 

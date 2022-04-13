@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --array=1-4 # 1-10%5 only run 5 at a time
+#SBATCH --array=1-5 # 1-10%5 only run 5 at a time
 #SBATCH --ntasks=8
 #SBATCH --nodes=1
 #SBATCH --mem=99G
@@ -14,7 +14,7 @@ TMPout=$TMPDIR/$USER/$SLURM_JOBID
 mkdir -p $TMPout
 cd "$TMPout"
 
-depth=$(echo 1 5 10 20 | cut -d " " -f "$SLURM_ARRAY_TASK_ID")
+depth=$(echo 1 5 10 20 30 | cut -d " " -f "$SLURM_ARRAY_TASK_ID")
 SCRATCHout=/mnt/SCRATCH/ankjelst/sim_pipe
 homedir=/mnt/users/ankjelst
 #samples=$(ls "$SCRATCHout"/pggb/*2hap.fa)
@@ -50,26 +50,44 @@ do
     singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg minimizer -o "$name".min -d "$name".dist "$name".giraffe.gbz
 
     singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg giraffe \
-    --fragment-mean 400 --fragment-stdev 50 -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE > "$name".gam
+    -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE > "$name".gam
+
+   
+    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg giraffe \
+    --fragment-mean 400 --fragment-stdev 50 -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE > "$name"-frgm400.gam
 
     # Print mapping stats
     #####################
 
     singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg stats -a "$name".gam > "$name".stats
+    
+    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg stats -a "$name"-frgm400.gam > "$name"-frgm400.stats
 
     # Variant calling
     ##################
 
     singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg pack \
     -x "$gfa" -g "$name".gam -o "$name".pack -t $SLURM_CPUS_ON_NODE 
+    
+        singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg pack \
+    -x "$gfa" -g "$name"-frgm400.gam -o "$name"-frgm400.pack -t $SLURM_CPUS_ON_NODE 
+
 
 
     # then vg call
-
+    
     singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg call \
     -a -A --pack "$name".pack -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name "$gfa" > "$name".vcf
+    
+    cp "$name".vcf "$SCRATCHout"/h1
+    
+    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg call \
+    -a -A --pack "$name"-frgm400.pack -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name "$gfa" > "$name"-frgm400.vcf
+    cp "$name"-frgm400.vcf "$SCRATCHout"/frgm400
 done
 echo "FINISHED giraffe + vg call"
+
+
 
 
 # running pangenie
@@ -104,8 +122,9 @@ cat $fq1 $fq2 > reads.fq
 
 echo "Run pangenie"
 
-$homedir/tools/pangenie/build/src/PanGenie -i reads.fq -r "$pangenieref" -v filtered.vcf -t $SLURM_CPUS_ON_NODE -j $SLURM_CPUS_ON_NODE -o pangenie -s "$name"
+$homedir/tools/pangenie/build/src/PanGenie -i reads.fq -r "$pangenieref" -v filtered.vcf -t $SLURM_CPUS_ON_NODE -j $SLURM_CPUS_ON_NODE -o pangenie-"$depth" -s "$name"
 
+cp pangenie-"$depth"_genotyping.vcf "$SCRATCHout"/h1_pangenie
 ##########################
 # resolve nested genotypes
 
