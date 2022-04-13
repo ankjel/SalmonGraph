@@ -202,12 +202,36 @@ ggplot(truth, aes(x = name, y = nznf)) +
 
 called %>% 
   mutate(idx = row_number()) %>% 
-  ggplot(aes(x = str_c(name, idx), y = nznf)) + 
+  ggplot(aes(x = name, y = nznf)) + 
   geom_col() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   labs(title = "called")
 ```
 
+
+```{r}
+ggplot(truth.new, aes(x = name, y = nznf)) + 
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(title = "True")
+
+```
+```{r}
+called.new %>%  mutate(idx = row_number()) %>% 
+  ggplot(aes(x = name, y = nznf)) + 
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(title = "called")
+```
+
+
+```{r}
+frgm %>%  mutate(idx = row_number()) %>% 
+  ggplot(aes(x = name, y = nznf)) + 
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(title = "called")
+```
 
 
 ## Further work
