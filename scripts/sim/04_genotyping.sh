@@ -21,6 +21,7 @@ homedir=/mnt/users/ankjelst
 samples=""$SCRATCHout"/pggb/ref-2hap.fa "$SCRATCHout"/pggb/h1-2hap.fa"
 jobout="$SCRATCHout"/"$SLURM_JOBID"-"$depth"
 
+image=/mnt/
 mkdir -p $jobout
 
 for sample in $(echo "$samples")
@@ -36,6 +37,9 @@ done
 
 gfa="$SCRATCHout"/pggb/pggb.fasta-chop.gfa
 refheader="ref#1#ssa22"
+
+# inspiration of finding time and memory: https://github.com/vgteam/giraffe-sv-paper/blob/805dcd95d24d2b320fdf253b6ee6a35a3b60066f/scripts/mapping/giraffe_speed.sh
+
 
 for sample in $(echo "$samples")
 do

@@ -44,8 +44,7 @@ cat h1-1.fa h1-2.fa > h1-2hap.fa
 
 
 fasta=pggb.fasta
-files=$(ls *2hap.fa)
-cat $files > $fasta
+cat ref1.fa h1-2.fa > $fasta
 
 haplotypes=$(cat "$fasta" | grep "^>" | wc -l)
 
@@ -53,9 +52,7 @@ haplotypes=$(cat "$fasta" | grep "^>" | wc -l)
 param_s=100000 # segment size, this should only be this small because we have a small graph, for full chromosomes set to 100000
 param_p=98 # percent identity in the wfmash step, including variants. This should not be so strict for this small example
 param_n=$haplotypes  #Ideally, you should set this to equal the number of haplotypes in the pangenome.
-param_K=16 # Kmer size for aligning
 param_i="$(basename $fasta)" 
-param_l=300000 # minimum block length filter for mapping. (segments are merged to blocks, default 3*segment-length)
 
 #seqwish
 param_k=311 #filter exact matches below this length [default: 29]
@@ -74,8 +71,8 @@ pggbout=pggb.out
 
 echo "RUN PGGB"
 
-singularity exec "$homedir"/tools/pggb-v020.sif pggb -i $param_i -s $param_s -p $param_p -K $param_K \
--n $param_n -t $SLURM_CPUS_ON_NODE -k $param_k -o $pggbout -G $param_G -V $param_V #-l $param_l
+singularity exec "$homedir"/tools/pggb_v0.3.0.sif pggb -i $param_i -s $param_s -p $param_p \
+-n $param_n -t $SLURM_CPUS_ON_NODE -k $param_k -o $pggbout -G $param_G -V $param_V -A
 
 
 #chop graph
@@ -83,10 +80,10 @@ odgi=$(ls $pggbout/*.smooth.og)
 fastabase=$(basename "$fasta")
 
 echo "Chop graph"
-singularity exec "$homedir"/tools/pggb-v020.sif odgi chop -c 1024 -i $odgi -o "$fastabase"-chop.og
+singularity exec "$homedir"/tools/pggb_v0.3.0.sif odgi chop -c 1024 -i $odgi -o "$fastabase"-chop.og
 
-singularity exec "$homedir"/tools/pggb-v020.sif odgi view -i "$fastabase"-chop.og --to-gfa > "$fastabase"-chop.gfa
-singularity exec "$homedir"/tools/vg_v1.38.0.sif vg deconstruct -p "ref#1#ssa22" -H "#" -a -e "$fastabase"-chop.gfa > chop-deconstruct-"$fasta".vcf
+singularity exec "$homedir"/tools/pggb_v0.3.0.sif odgi view -i "$fastabase"-chop.og --to-gfa > "$fastabase"-chop.gfa
+singularity exec "$homedir"/tools/pggb_v0.3.0.sif vg deconstruct -p "ref#1#ssa22" -H "#" -a -e "$fastabase"-chop.gfa > chop-deconstruct-"$fasta".vcf
 
 singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools\:1.14--hb421002_0 bgzip chop-deconstruct-"$fasta".vcf
 
