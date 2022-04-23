@@ -29,7 +29,7 @@ for (file in list.files(data.dir, pattern = "G.*.vcf")){
 }
 
 
-for (file in list.files(data.dir, pattern = "S.*.vcf")){
+for (file in list.files(data.dir, pattern = "s.*.vcf")){
   
   vcf <- read_delim(str_c(data.dir, file), delim = "\t", comment="##") %>% 
     rename("CHROM" = `#CHROM`)%>% 
@@ -38,10 +38,10 @@ for (file in list.files(data.dir, pattern = "S.*.vcf")){
   rec <- recall(true.vcf = true, predicted.vcf = vcf, tolerance = tol)
   f1 <-2*pre*rec/(pre + rec)
   
-  if (!exists("S.tbl")){
-    S.tbl <- tibble(file = file, f1 = f1)
+  if (!exists("s.tbl")){
+    s.tbl <- tibble(file = file, f1 = f1)
   }else{
-    S.tbl <- add_row(S.tbl, file = file, f1 = f1 )
+    s.tbl <- add_row(s.tbl, file = file, f1 = f1 )
   }
 }
 

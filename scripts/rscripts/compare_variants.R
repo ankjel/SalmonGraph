@@ -72,6 +72,8 @@ ssa22.52.62 <- filter(vcf, POS > 24000000)
 true.14.24 <- filter(vcf.true, START <= 24000000)
 true.52.62 <- filter(vcf.true, START > 24000000)
 
+
+
 results <- rbind(results, tibble(region = "ssa22:14-24", type = "all", precision = precision(true.vcf = true.14.24, predicted.vcf = ssa22.14.24, tolerance = tol),
                                  recall = recall(true.vcf = true.14.24, predicted.vcf = ssa22.14.24, tolerance = tol)))
 
@@ -79,7 +81,39 @@ results <- rbind(results, tibble(region = "ssa22:52-62", type = "all", precision
                                  recall = recall(true.vcf = true.52.62, predicted.vcf = ssa22.52.62, tolerance = tol)))
 
 
+
+
+
+
+ssa22.14.24.ins <- filter(ssa22.14.24, type == "insertion")
+ssa22.52.62.ins  <- filter(ssa22.52.62, type == "insertion")
+
+true.14.24.ins <- filter(true.14.24, TYPE == "insertion")
+true.52.62.ins <- filter(true.52.62, TYPE == "insertion")
+
+ssa22.14.24.del <- filter(ssa22.14.24, type != "insertion")
+ssa22.52.62.del  <- filter(ssa22.52.62, type != "insertion")
+
+true.14.24.del <- filter(true.14.24, TYPE != "insertion")
+true.52.62.del <- filter(true.52.62, TYPE != "insertion")
+
+
+results <- rbind(results, tibble(region = "ssa22:14-24", type = "insertion", precision = precision(true.vcf = true.14.24.ins, predicted.vcf = ssa22.14.24.ins, tolerance = tol),
+                                 recall = recall(true.vcf = true.14.24.ins, predicted.vcf = ssa22.14.24.ins, tolerance = tol)))
+
+results <- rbind(results, tibble(region = "ssa22:52-62", type = "insertion", precision = precision(true.vcf = true.52.62.ins, predicted.vcf = ssa22.52.62.ins, tolerance = tol),
+                                 recall = recall(true.vcf = true.52.62.ins, predicted.vcf = ssa22.52.62.ins, tolerance = tol)))
+
+
+results <- rbind(results, tibble(region = "ssa22:14-24", type = "deletion", precision = precision(true.vcf = true.14.24.del, predicted.vcf = ssa22.14.24.del, tolerance = tol),
+                                 recall = recall(true.vcf = true.14.24.del, predicted.vcf = ssa22.14.24.del, tolerance = tol)))
+
+results <- rbind(results, tibble(region = "ssa22:52-62", type = "deletion", precision = precision(true.vcf = true.52.62.del, predicted.vcf = ssa22.52.62.del, tolerance = tol),
+                                 recall = recall(true.vcf = true.52.62.del, predicted.vcf = ssa22.52.62.del, tolerance = tol)))
+
+
+
+
+
 results %>% 
   mutate(F1 = 2*precision*recall/(precision + recall)) -> final
-
-

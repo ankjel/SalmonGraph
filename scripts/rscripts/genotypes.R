@@ -8,7 +8,7 @@ vcf.true <- read_delim(path.true, delim = "\t", comment="#", col_names = c('CHRO
 
 vcf.path <- "/mnt/SCRATCH/ankjelst/sim_pipe/h1"
 
-vcf.setfrml <- "/mnt/SCRATCH/ankjelst/sim_pipe/frm400"
+vcf.setfrml <- "/mnt/SCRATCH/ankjelst/sim_pipe/frgm400"
 
 
 i <- 1
@@ -32,7 +32,6 @@ i <- 1
 for (f in list.files(vcf.setfrml)){
   new.vcf <- read_delim(str_c(vcf.setfrml, "/", f), delim = "\t", comment="##") %>% 
     mutate(TYPE=ifelse(REF > ALT, "deletion", "insertion")) 
-  print(colnames(new.vcf))
   if (i == 1){
     vcf.frgml <- new.vcf
   }else if (sum(vcf$ID == new.vcf$ID)==nrow(vcf)){
