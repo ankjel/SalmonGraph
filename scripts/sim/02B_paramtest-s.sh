@@ -4,7 +4,7 @@
 #SBATCH --job-name=pggb-paramtest  # sensible name for the job
 #SBATCH --mem=150G 
 #SBATCH --partition=hugemem
-#SBATCH --output=log-pggbparams_S-%j.log
+#SBATCH --output=log-pggbparams_s-%j.log
 #SBATCH --constraint="avx2" # IMPOTATANT!!! PGGB jobs will fail without this
 
 homedir=/mnt/users/ankjelst
@@ -14,11 +14,11 @@ TMPout=$TMPDIR/$USER/$SLURM_JOBID
 mkdir -p $TMPout
 cd "$TMPout"
 
-fasta=/mnt/SCRATCH/ankjelst/sim_pipe/pggb/pggb.fasta
+fasta=/mnt/SCRATCH/ankjelst/sim_pipe/pggb/pggb.fasta.gz
 
-cp "$fasta" .
+cp "$fasta"* .
 
-haplotypes=$(cat "$fasta" | grep "^>" | wc -l)
+haplotypes=$(less "$fasta" | grep "^>" | wc -l)
 
 #wfmash
 param_s=100000 
@@ -31,7 +31,7 @@ param_k=311 #filter exact matches below this length [default: 29]
 
 #smoothxg
 param_H=$haplotypes # number of haplotypes, if different than that set with -n
-param_G="4001,4507" # target sequence length for POA, first pass = N, second pass = M [default: 4001,4507]
+param_G="13117,13219" # target sequence length for POA, first pass = N, second pass = M [default: 4001,4507]
 
 param_V='ref:#' # obs obs this should be set to the sample name you want as a refernc for your vcf
 
@@ -42,21 +42,30 @@ pggbout=pggb.out
 
 echo "RUN PGGB"
 
-echo -e "S_param\truntime_seconds" > S_runtime.txt
+echo -e "s_param\ttotal_time\tclock_time\tmemory(kbytes)\n" > s_runtime.txt
 
 for param_s in 5000 10000 20000 50000 100000 200000
 do
-    start=`date +%s` # time pggb run
-    singularity exec "$homedir"/tools/pggb-v020.sif pggb -i $param_i -s $param_s -p $param_p -K $param_K \
-    -n $param_n -t $SLURM_CPUS_ON_NODE  -o $pggbout -G $param_G -V $param_V #-l $param_l
-    end=`date +%s`
-    runtime=$((end-start)) # I do it this way so it is easy to save timing to file
-    echo -e ""$param_s"\t"$runtime"" >> S_runtime.txt
-    mv "$pggbout"/*.vcf "$SCRATCHout"/S-"$param_s".vcf
+    singularity exec "$homedir"/tools/pggb_v0.2.0.sif "$homedir"/tools/time -v bash -c "pggb -i $param_i -n $param_n -s $param_s \
+    -p $param_p -t $SLURM_CPUS_ON_NODE -k $param_k -o $pggbout -G $param_G -V $param_V"  > pggbout-"$param_s".txt 2> time_log.txt
+    
+    USER_TIME="$(cat "time_log.txt" | grep "User time" | sed 's/User\ time\ (seconds):\ \([0-9]*\.[0-9]*\)/\1/g')"
+    SYS_TIME="$(cat "time_log.txt" | grep "System time" | sed 's/System\ time\ (seconds):\ \([0-9]*\.[0-9]*\)/\1/g')"
+    TOTAL_TIME="$(echo "${USER_TIME} + ${SYS_TIME}" | bc -l)"
+    CLOCK_TIME="$(cat "time_log.txt" | grep "Elapsed (wall clock) time" | sed 's/.*\ \([0-9,:]*\)/\1/g')"
+    MEMORY="$(cat "time_log.txt" | grep "Maximum resident set" | sed 's/Maximum\ resident\ set\ size\ (kbytes):\ \([0-9]*\)/\1/g')"
+        
+    
+    echo -e ""$param_s"\t"$TOTAL_TIME"\t"$CLOCK_TIME"\t"$MEMORY"\n" >> s_runtime.txt
+    mv "$pggbout"/*.vcf "$SCRATCHout"/s-"$param_s".vcf
+    mv pggbout-"$param_s".txt "$SCRATCHout"
     rm -r "$pggbout"
 done
 
-mv S_runtime.txt $SCRATCHout
+
+
+
+mv s_runtime.txt $SCRATCHout
 cd ..
 rm -r $TMPout
 

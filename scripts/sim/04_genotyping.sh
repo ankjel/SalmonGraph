@@ -18,20 +18,17 @@ depth=$(echo 1 5 10 20 30 | cut -d " " -f "$SLURM_ARRAY_TASK_ID")
 SCRATCHout=/mnt/SCRATCH/ankjelst/sim_pipe
 homedir=/mnt/users/ankjelst
 #samples=$(ls "$SCRATCHout"/pggb/*2hap.fa)
-samples=""$SCRATCHout"/pggb/ref-2hap.fa "$SCRATCHout"/pggb/h1-2hap.fa"
+sample="$SCRATCHout"/pggb/h1-2hap.fa
 jobout="$SCRATCHout"/"$SLURM_JOBID"-"$depth"
 
 image=/mnt/
 mkdir -p $jobout
 
-for sample in $(echo "$samples")
-do
-# art read simulation
-    name=$(basename -s .fa $sample)-$depth
-    singularity exec /cvmfs/singularity.galaxyproject.org/a/r/art:2016.06.05--he1d7d6f_6 \
-    art_illumina --seqSys HS25 -sam --in "$sample" --paired --len 150 --fcov "$depth" --mflen 400 --sdev 50 --out "$name"
 
-done
+name=$(basename -s .fa $sample)-$depth
+singularity exec /cvmfs/singularity.galaxyproject.org/a/r/art:2016.06.05--he1d7d6f_6 \
+art_illumina --seqSys HS25 -sam --in "$sample" --paired --len 150 --fcov "$depth" --mflen 400 --sdev 50 --out "$name"
+
 
 #run giraffe + vg call
 
@@ -41,55 +38,50 @@ refheader="ref#1#ssa22"
 # inspiration of finding time and memory: https://github.com/vgteam/giraffe-sv-paper/blob/805dcd95d24d2b320fdf253b6ee6a35a3b60066f/scripts/mapping/giraffe_speed.sh
 
 
-for sample in $(echo "$samples")
-do
-    name=$(basename -s .fa $sample)-$depth
-    echo "running genotyping for " "$name"
-    fq1="$name"1.fq
-    fq2="$name"2.fq
 
-    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg gbwt -g "$name".giraffe.gbz --gbz-format -G "$gfa" --path-regex "(.*)#(.*)#(.*)" --path-fields _SHC --max-node 0
-    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg snarls -T "$name".giraffe.gbz > "$name".snarls
-    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg index -s "$name".snarls -j "$name".dist -p -b $TMPDIR/$USER "$name".giraffe.gbz
-    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg minimizer -o "$name".min -d "$name".dist "$name".giraffe.gbz
+name=$(basename -s .fa $sample)-$depth
+echo "running genotyping for " "$name"
+fq1="$name"1.fq
+fq2="$name"2.fq
 
-    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg giraffe \
-    -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE > "$name".gam
+singularity exec vg ~/tools/time bash -c "/mnt/users/ankjelst/tools/vg_v1.38.0.sif vg gbwt -g "$name".giraffe.gbz --gbz-format -G "$gfa" --path-regex "(.*)#(.*)#(.*)" --path-fields _SHC --max-node 0" > gbwt.txt
 
-   
-    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg giraffe \
-    --fragment-mean 400 --fragment-stdev 50 -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE > "$name"-frgm400.gam
 
-    # Print mapping stats
-    #####################
+singularity exec vg ~/tools/time bash -c "/mnt/users/ankjelst/tools/vg_v1.38.0.sif vg snarls -T "$name".giraffe.gbz" > "$name".snarls 2> snarls.txt
 
-    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg stats -a "$name".gam > "$name".stats
-    
-    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg stats -a "$name"-frgm400.gam > "$name"-frgm400.stats
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg ~/tools/time bash -c "vg index -s "$name".snarls -j "$name".dist -p -b $TMPDIR/$USER "$name".giraffe.gbz" > index.txt
 
-    # Variant calling
-    ##################
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg ~/tools/time bash -c "vg minimizer -o "$name".min -d "$name".dist "$name".giraffe.gbz" > minimizer.txt
 
-    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg pack \
-    -x "$gfa" -g "$name".gam -o "$name".pack -t $SLURM_CPUS_ON_NODE 
-    
-        singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg pack \
-    -x "$gfa" -g "$name"-frgm400.gam -o "$name"-frgm400.pack -t $SLURM_CPUS_ON_NODE 
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg ~/tools/time bash -c "giraffe -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE" > "$name".gam 2> giraffe.txt
 
 
 
-    # then vg call
-    
-    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg call \
-    -a -A --pack "$name".pack -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name "$gfa" > "$name".vcf
-    
-    cp "$name".vcf "$SCRATCHout"/h1
-    
-    singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg call \
-    -a -A --pack "$name"-frgm400.pack -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name "$gfa" > "$name"-frgm400.vcf
-    cp "$name"-frgm400.vcf "$SCRATCHout"/frgm400
-done
+# Print mapping stats
+#####################
+
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg stats -a "$name".gam > "$name".stats
+
+
+# Variant calling
+##################
+
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg ~/tools/time bash -c "vg pack
+-x "$gfa" -g "$name".gam -o "$name".pack -t $SLURM_CPUS_ON_NODE" > pack.txt
+
+
+
+# then vg call
+
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg ~/tools/time bash -c "vg call \
+-a -A --pack "$name".pack -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name "$gfa"" > "$name".vcf 2> call.txt
+
+
+
 echo "FINISHED giraffe + vg call"
+
+
+
 
 
 
@@ -120,13 +112,16 @@ fq2="$name"2.fq
 
 cat $fq1 $fq2 > reads.fq
 
+
+
 #######################
 # Run pangenie 
 
 
 echo "Run pangenie"
 
-$homedir/tools/pangenie/build/src/PanGenie -i reads.fq -r "$pangenieref" -v filtered.vcf -t $SLURM_CPUS_ON_NODE -j $SLURM_CPUS_ON_NODE -o pangenie-"$depth" -s "$name"
+$homedir/tools/time bash -c "$homedir/tools/pangenie/build/src/PanGenie -i reads.fq -r "$pangenieref" -v filtered.vcf -t $SLURM_CPUS_ON_NODE -j $SLURM_CPUS_ON_NODE -o pangenie-"$depth" -s "$name"" > pangenie.txt
+
 
 cp pangenie-"$depth"_genotyping.vcf "$SCRATCHout"/h1_pangenie
 ##########################
@@ -142,10 +137,22 @@ echo "Resolve nested genotypes"
 
 #$homedir/tools/resolve-nested-genotypes "$deconstructed_vcf".gz pangenie_genotyping.vcf.gz > resolved_genotypes.vcf
 
+echo -e "tool\tclock_time\tmemory(kbytes)\n" > genotype"$depth"_time.txt
+
+for file in "gbwt.txt snarls.txt index.txt minimizer.txt giraffe.txt pack.txt call.txt pangenie.txt"
+do
+    CLOCK_TIME="$(cat $file | grep "Elapsed (wall clock) time" | sed 's/.*\ \([0-9,:]*\)/\1/g')"
+    MEMORY="$(cat $file | grep "Maximum resident set" | sed 's/Maximum\ resident\ set\ size\ (kbytes):\ \([0-9]*\)/\1/g')"
+
+    tool=$basename($file .txt)
+    echo -e ""$tool"\t"$CLOCK_TIME"\t"$MEMORY"\n" >>genotype"$depth"_time.txt
+
+cp "$name".vcf "$SCRATCHout"/h1
 
 
 
-cp *.stats *.vcf *.vcf* "$jobout"
+
+cp *.stats *.vcf *.vcf* genotype"$depth"_time.txt "$jobout"
 
 cd ..
 
