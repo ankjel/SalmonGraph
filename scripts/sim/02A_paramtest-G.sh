@@ -18,7 +18,8 @@ fasta=/mnt/SCRATCH/ankjelst/sim_pipe/pggb/pggb.fasta.gz
 
 cp "$fasta"* .
 
-haplotypes=$(less "$fasta" | grep "^>" | wc -l)
+haplotypes=2
+#$(less "$fasta" | grep "^>" | wc -l)
 
 
 #wfmash

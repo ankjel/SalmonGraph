@@ -41,12 +41,22 @@ sed 's/>.*/>simulated#1#ssa22/' $ref > h1-1.fa
 sed 's/>.*/>simulated#2#ssa22/' $outhack/h1.fa > h1-2.fa
 cat h1-1.fa h1-2.fa > h1-2hap.fa
 
-cat ref1.fa h1-2.fa > pggb.fasta
+cat ref1.fa h1-2.fa > pggb_nodup.fasta
 
+fasta=pggb.fasta
+files=$(ls *2hap.fa)
+cat $files > $fasta
 
 singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools\:1.14--hb421002_0 bgzip -@ "$SLURM_CPUS_ON_NODE" pggb.fasta
 
 singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools\:1.14--hb421002_0 samtools faidx pggb.fasta.gz
+
+
+
+singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools\:1.14--hb421002_0 bgzip -@ "$SLURM_CPUS_ON_NODE" pggb_nodup.fasta
+
+singularity exec /cvmfs/singularity.galaxyproject.org/s/a/samtools\:1.14--hb421002_0 samtools faidx pggb_nodup.fasta.gz
+
 
 cp *.fa *.fasta.gz* "$SCRATCHout" 
 

@@ -10,15 +10,15 @@ source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/new_metrics.R")
 ##################
 # load data
 
-path.vcf <- "/mnt/SCRATCH/ankjelst/sim_pipe/pggb/chop-deconstruct-pggb.fasta.vcf.gz"
+path.vcf <- "/mnt/SCRATCH/ankjelst/sim_pipe/pggb/chop-deconstruct-pggb.fasta.gz.vcf.gz"
 
-vcf <- read_delim(path.vcf, delim = "\t", comment="##") %>% rename("CHROM" = `#CHROM`)
+vcf <- read_delim(path.vcf, delim = "\t", comment="##") %>% 
+  rename("CHROM" = `#CHROM`) %>% 
+  mutate(START = POS, END = POS + str_length(REF))
+
 path.true <- "/mnt/users/ankjelst/MasterScripts/scripts/sim/ssa22variants_tworegions.bed"
 
 vcf.true <- read_delim(path.true, delim = "\t", comment="#", col_names = c('CHROM', 'START', 'END', 'TYPE', 'SEQUENCE', 'X'))
-
-vcf <- vcf %>% mutate(START = POS, END = POS + str_length(REF))
-
 
 
 ###########################
@@ -117,3 +117,25 @@ results <- rbind(results, tibble(region = "ssa22:52-62", type = "deletion", prec
 
 results %>% 
   mutate(F1 = 2*precision*recall/(precision + recall)) -> final
+
+
+
+
+# No dup
+
+
+path.nodup <- "/mnt/SCRATCH/ankjelst/sim_pipe/pggb/pggb_nodup.fasta.gz.beca995.4030258.7d0af10.smooth.ref.vcf"
+vcf.nodup <- read_delim(path.nodup, delim = "\t", comment="##") %>% 
+  rename("CHROM" = `#CHROM`) %>% 
+  mutate(START = POS, END = POS + str_length(REF))
+
+precision(true.vcf = vcf.true, predicted.vcf = vcf.nodup, tolerance = tol)
+recall(true.vcf = vcf.true, predicted.vcf = vcf.nodup, tolerance = tol)
+
+
+false.negative(true.vcf = vcf.true, predicted.vcf = vcf.nodup, tolerance = tol)
+false.positive(true.vcf = vcf.true, predicted.vcf = vcf.nodup, tolerance = tol)
+true.positive(true.vcf = vcf.true, predicted.vcf = vcf.nodup, tolerance = tol)
+
+
+

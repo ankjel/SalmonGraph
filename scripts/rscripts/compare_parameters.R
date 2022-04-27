@@ -1,4 +1,4 @@
-source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/metrics.R")
+source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/new_metrics.R")
 
 
 ##################
@@ -22,9 +22,9 @@ for (file in list.files(data.dir, pattern = "G.*.vcf")){
   f1 <-2*pre*rec/(pre + rec)
   
   if (!exists("G.tbl")){
-    G.tbl <- tibble(file = file, f1 = f1)
+    G.tbl <- tibble(file = file, f1 = f1, precision = pre, recall = rec)
   }else{
-    G.tbl <- add_row(G.tbl, file = file, f1 = f1 )
+    G.tbl <- add_row(G.tbl, file = file, f1 = f1, precision = pre, recall = rec )
   }
 }
 
@@ -39,16 +39,16 @@ for (file in list.files(data.dir, pattern = "s.*.vcf")){
   f1 <-2*pre*rec/(pre + rec)
   
   if (!exists("s.tbl")){
-    s.tbl <- tibble(file = file, f1 = f1)
+    s.tbl <- tibble(file = file, f1 = f1, precision = pre, recall = rec)
   }else{
-    s.tbl <- add_row(s.tbl, file = file, f1 = f1 )
+    s.tbl <- add_row(s.tbl, file = file, f1 = f1, precision = pre, recall = rec)
   }
 }
 
 
 
 for (file in list.files(data.dir, pattern = "runtime")){
-  mytbl <- read_tsv(str_c(data.dir, file)) %>% 
+  mytbl <- read_tsv(str_c(data.dir, file), col_types = cols(clock_time = col_time(format="%M:%S"))) %>% 
     pivot_longer(1, names_to = "param", values_to = "param.value")
   if (!exists("time.tbl")){
     time.tbl <- mytbl

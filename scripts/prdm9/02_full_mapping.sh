@@ -19,10 +19,10 @@
 
 # Prep3
 ##################################
-fasta=$1 
-pggb_dir=$2
-fq1original=$3
-fq2original=$4
+fasta=/mnt/SCRATCH/ankjelst/data/prdm9/newfull.fasta 
+gfa=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-final.out
+fq1original=$1
+fq2original=$2
 
 outdir=/mnt/SCRATCH/ankjelst/data/prdm9/"$SLURM_JOB_ID"
 
@@ -51,13 +51,11 @@ fq2=$(basename "$fq2gz" .gz)
 
 name=$(echo "$fq1"| cut -d'_' -f 3)
 
-gfa=$(ls "$pggb_dir"/*chop.gfa)
 
 # Choose a referance for genotype calling
 refheader="SimonResolved#2#sige" # this is the shortest, thats why ipicked this, vcf is easier to read
 
 echo "fasta:" $fasta
-echo "pggb dir:" $pggb_dir
 echo "fastq dir:" $fqs
 
 echo "gfa:" $gfa
@@ -67,7 +65,7 @@ echo "name:" $name
 echo "referance for genotyping" $refheader
 
 echo "genotype"
-/mnt/users/ankjelst/MasterScripts/scripts/prdm9/genotyping-odgi-test.sh "$name" "$gfa" "$refheader" "$fq1" "$fq2"
+/mnt/users/ankjelst/MasterScripts/scripts/prdm9/genotyping-odgi.sh "$name" "$gfa" "$refheader" "$fq1" "$fq2"
 
 mv *.txt *.vcf "$outdir"
 

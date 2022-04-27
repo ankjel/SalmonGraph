@@ -60,7 +60,6 @@ vcf.filtered <- vcf %>%
 region1 <- vcf.filtered %>% 
   filter(pos > 14000000, pos < 24000000) 
 
-region1pos <- select(region1, chrom, pos, END) %>% rename("start" = pos, "end" = END)
 
 df <- overlappingVariants(region1pos)
 
@@ -74,7 +73,7 @@ dim(df)
 region2 <- vcf.filtered %>% 
   filter(pos > 52000000, pos < 62000000) 
 
-region2pos <- select(region2, chrom, pos, END) %>% rename("start" = pos, "end" = END)
+region2pos <- select(region2, chrom, pos, END) %>% rename(start = pos, end = END)
 
 df <- overlappingVariants(region2pos)
 

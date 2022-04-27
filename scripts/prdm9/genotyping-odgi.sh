@@ -7,18 +7,7 @@ fq1=$4
 fq2=$5
 
 
-
-
-# vcf + fasta would be better, but I will try both I guess?
-# for vcf + fasta I will have to: choose a reference, make a fasta with only reference, use vcf from deconstruct (?)
-
-# https://github.com/vgteam/vg/issues/3455
-
-# do the chopping of graph nodes in construction script since it is the same for alle samples
-#singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif odgi chop -c 1024 -i $odgi -o new.og
-#singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif odgi view -i new.og --to-gfa > new.gfa
-
-singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg deconstruct -p 'Simon2#2#sige' -e -a -t $SLURM_CPUS_ON_NODE $gfa > deconstructed.vcf
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg deconstruct -p 'SimonResolved#2#sige' -e -a -t $SLURM_CPUS_ON_NODE $gfa > deconstructed.vcf
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg gbwt -g "$name".giraffe.gbz --gbz-format -G "$gfa" --path-regex "(.*)#(.*)#(.*)" --path-fields _SHC --max-node 0
 
@@ -67,8 +56,5 @@ singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg pack \
 echo "Running vg call"
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg call \
--a -A --pack "$name".pack  -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name "$gfa" > "$name"_simon_all.vcf
-
-singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg call \
---pack "$name".pack -v deconstructed.vcf -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name "$gfa" > "$name"_simon.vcf
+-a -A --pack "$name".pack  -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name "$gfa" > "$name"_simon.vcf
 

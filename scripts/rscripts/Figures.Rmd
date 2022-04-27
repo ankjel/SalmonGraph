@@ -60,18 +60,76 @@ Should I mention how the tools are obtained or/and version number?
 ### SV detection
 
 - SV length distrobution -FIGURE
-
 ```{r}
+library(cowplot)
+
+library(ggrepel)
+```
+
+```{r message=FALSE, warning=FALSE}
+source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/genotypes.R")
+
+vcf.true %>% group_by(TYPE) %>% summarise(n())
+
+vcf.true %>% 
+    mutate(region = factor(ifelse(START < 24000000,  "Low repeat region", "High repeat region"), levels = c("Low repeat region", "High repeat region"))) %>% 
+  group_by(TYPE, region) %>% 
+  summarise(n())
+```
+
+
+```{r full-length-distr, message=FALSE, warning=FALSE}
+labels <- c("Insertions", "Deletions")
+
+vcf.true %>%
+  mutate(length = ifelse(TYPE == "deletion", END-START, str_length(SEQUENCE)),
+         region = factor(ifelse(START < 24000000,  "Low repeat region", "High repeat region"), levels = c("Low repeat region", "High repeat region")),
+         # next is just go get pretty facet labels easy
+         TYPE = ifelse(TYPE == "deletion", "Deletions", "Insertions")) %>%
+  ggplot(aes(x=length, fill=TYPE)) + geom_histogram(binwidth = 30)+
+
+  theme_minimal()+
+
+  theme(legend.position="none") + 
+
+  labs(x = "SV size", y = "Count")+
+
+  scale_fill_brewer(palette = "Dark2") +
+
+  facet_grid(rows=vars(TYPE), cols=vars(region), scales = "free") -> full
 
 
 ```
 
 
+```{r length-dist}
+vcf.true %>%
+  mutate(length = ifelse(TYPE == "deletion", END-START, str_length(SEQUENCE)),
+         region = factor(ifelse(START < 24000000,  "Low repeat region", "High repeat region"), levels = c("Low repeat region", "High repeat region")),
+         # next is just go get pretty facet labels easy
+         TYPE = ifelse(TYPE == "deletion", "Deletions", "Insertions")) %>%
+  ggplot(aes(x=length, fill=TYPE)) + geom_histogram(binwidth = 10)+
+
+  theme_minimal()+
+
+  theme(legend.position="none") + 
+
+  labs(x = "SV size", y = "Count")+
+
+  scale_fill_brewer(palette = "Dark2") +
+
+  facet_grid(rows=vars(TYPE), cols=vars(region), scales = "free") +
+  lims(x = c(50, 1500)) -> small
+
+
+plot_grid(full, small , ncol = 1, labels = c("A", "B"), 
+          rel_heights = c(1, 2), label_size = 10)
+```
+
+
 
 ```{r message=FALSE, warning=FALSE}
-source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/genotypes.R")
 
-labels <- c("Insertions", "Deletions")
 names(labels) <- c("insertion", "deletion")
 rects <- data.frame(start=c(14000000, 52000000), end=c(24000000,62000000), group=seq_along(c(14000000, 52000000)))
 
@@ -81,17 +139,24 @@ vcf.true %>%
   ggplot(aes(x=START, color=TYPE)) + geom_freqpoly(binwidth=1000000)+ 
   
   theme_minimal()+ 
-  theme(legend.position="none",  axis.title.x = element_blank(), axis.text.x = element_blank()) + labs(y = "Count")+
+  theme(axis.title.x = element_blank(), 
+        axis.text.x = element_blank(),
+        legend.position = c(.05, .95),
+        legend.justification = c("left", "top"),
+        legend.box.just = "left",
+        legend.margin = margin(6, 6, 6, 6)) + 
+  
+  labs(y = "Count", col = "SV type")+
   
   scale_x_continuous(breaks = seq(0, 60000000, by = 10000000), limits = c(-1000000, 64000000), labels = c("0Mbp", "10Mbp", "20Mbp", "30Mbp", "40Mbp", "50Mbp", "60Mbp"))+
   
   scale_color_brewer(palette = "Dark2") +
   
-  facet_wrap(vars(TYPE), scales = "free_y", ncol = 1, labeller=labeller(TYPE=labels))+
+#  facet_wrap(vars(TYPE), scales = "free_y", ncol = 1, labeller=labeller(TYPE=labels))+
   geom_rect(data=rects, inherit.aes=FALSE, aes(xmin=start, xmax=end, ymin=-Inf,
                 ymax=Inf, group=group), color="transparent", fill="orange", alpha=0.1) -> p1
 
-
+p1
 ```
 
 
@@ -114,47 +179,112 @@ p2 <- ggplot(rep.bed, aes(y = rep, x = start.bin, width = 1000000)) +
 
 
 ```{r}
-library(cowplot)
-
 
 plot_grid(p1, p2, ncol = 1, labels = c("A", "B"), 
-          rel_heights = c(4, 1), align = "v", label_size = 10)
+          rel_heights = c(2, 1), align = "v", label_size = 10)
 
 
 ```
+
 
 
 ```{r message=FALSE, warning=FALSE}
 source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/compare_parameters.R")
 
 G.tbl %>% 
-  mutate(grp = "G", G = str_extract(file, pattern= "[0-9]*,[0-9]*")) %>% 
-  ggplot(aes(x = factor(G, levels = c("3079,3559", "7919,8069", "13117,13219", "18100,18200", "25000,25100")), y = f1, group = grp)) + geom_point() + geom_line()
-
-```
-
-```{r}
-S.tbl %>% 
-  mutate(grp = "S", S = as.numeric(str_extract(file, pattern= "[0-9]{4,7}"))) %>% 
-  ggplot(aes(x = factor(S), y = f1, group = grp)) + geom_point() + geom_line()
-```
-
-```{r}
-library(ggrepel)
-```
-
-```{r}
-
-G.tbl <- mutate(G.tbl, idx = as.numeric(str_extract(file, "[0-9]{4}")))
-
-G.times <- filter(time.tbl, param == "G_param") %>% mutate(idx = as.numeric(str_extract(param.value, "[0-9]{4}")))
+  mutate(grp = "G", 
+         G = if_else(str_detect(file, ","), str_extract(file, pattern= "[0-9]*,[0-9]*"), str_extract(file, pattern= "[0-9]{1,5}")),
+         G2 = as.numeric(if_else(str_detect(G, ","),
+                                 str_remove(G, pattern = ","),
+                                 G))) %>% 
   
-full_join(G.tbl, G.times, by = "idx") %>% 
-  mutate(param.value = str_extract(file, pattern=("[0-9]*,[0-9]*")),
-         minutes = runtime_seconds/60) %>% 
-  ggplot(aes(x = minutes, y = f1)) + geom_point() + geom_text_repel(aes(label = param.value),segment.color = 'grey50', arrow = T)
+  full_join(filter(time.tbl, param == "G_param"), by = c("G2" = "param.value")) %>% 
+  mutate(G = factor(G, levels = c( "3079,3559", "4001,4507", "7919,8069", "13117,13219", "18100,18200", "5000", "10000", "20000","25000,25100"))) -> G.plot
+
+
+G.plot %>%   
+  ggplot(aes(x = G, y = f1, group = grp)) + 
+  geom_point() + 
+  geom_line() +
+  labs(x = "G parameter values", y = "F1 score") + 
+  theme_minimal() +
+  theme(axis.title.x = element_blank(), 
+        axis.text.x = element_blank()) 
+
 
 ```
+
+
+
+
+```{r}
+s.tbl %>% 
+  mutate(grp = "s", s = as.numeric(str_extract(file, pattern= "[0-9]{4,7}"))) %>% 
+  full_join(filter(time.tbl, param == "s_param"), by = c("s" = "param.value")) %>% 
+  mutate(s = factor(s)) -> s.plot
+  
+s.plot %>% 
+  ggplot(aes(x = s, y = f1, group = grp)) + 
+  geom_point() + 
+  geom_line() + 
+  theme_minimal()+
+  labs(x = "s parameter values", y = "F1 score") +
+  theme(axis.title.x = element_blank(), 
+        axis.text.x = element_blank()) -> s.1
+
+
+
+```
+
+
+```{r}
+select(G.plot, -G2) %>% 
+  rename("param_value" = G) %>% 
+  rbind(rename(s.plot, "param_value" = s)) %>% 
+  rename("Parameter" = grp)-> plot.df
+
+
+plot.df %>% 
+  ggplot(aes(x = param_value, y = f1, group = Parameter, color =  Parameter)) + 
+  geom_point() + 
+  geom_line() + 
+  theme_minimal()+
+  facet_wrap(vars(Parameter), scales = "free")+
+  labs(x = "s parameter values", y = "F1 score") +
+  scale_color_brewer(palette = "Dark2") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1))
+```
+
+
+
+
+```{r}
+plot.df %>% 
+  ggplot(aes(x = param_value, y = `memory(kbytes)`, fill = Parameter)) +
+  geom_col() + 
+  theme_minimal()+
+  scale_fill_brewer(palette = "Dark2")+ 
+  facet_wrap(vars(Parameter), scales = "free_x") +
+  theme(axis.title.x = element_blank(), 
+        axis.text.x = element_blank()) -> mem
+
+
+plot.df %>% 
+  mutate(time = lubridate::as.duration(clock_time),
+         minutes = time/60) %>% 
+  ggplot(aes(x = param_value, y = minutes, fill = Parameter)) +
+  geom_col() + 
+  theme_minimal()+
+  scale_fill_brewer(palette = "Dark2")+ 
+  facet_wrap(vars(Parameter), scales = "free_x")+ 
+  theme(axis.text.x = element_text(angle = 55, vjust = 0.5)) -> time
+
+
+
+plot_grid(mem, time, ncol = 1, label_size = 10, align="v")
+
+```
+
 
 
 
@@ -174,12 +304,15 @@ final
 
  - Precision for each tools for each depth - FIGURE
  
+```{r message=FALSE, warning=FALSE}
+source("genotypes.R")
+```
  
 ```{r}
 rbind(pg, vg) %>% 
   mutate(depth = as.integer(depth),
          TYPE = ifelse(TYPE == "deletion", "Deletions", "Insertions")) %>% 
-  ggplot(aes(x = depth, y = precision, color = tool, group = tool)) + geom_line() + facet_wrap(vars(TYPE)) +
+  ggplot(aes(x = depth, y = precision, color = tool, group = tool)) + geom_line() + geom_point() + facet_wrap(vars(TYPE)) +
   scale_color_brewer(palette = "Dark2")+ theme_minimal()
 ```
 
@@ -190,10 +323,7 @@ rbind(pg, vg) %>%
 ```{r message=FALSE, paged.print=FALSE}
 source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/compare_prdm9znf.R")
 
-ggplot(truth, aes(x = name, y = nznf)) + 
-  geom_col() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  labs(title = "True")
+truth
 
 ```
 
@@ -216,6 +346,7 @@ ggplot(truth.new, aes(x = name, y = nznf)) +
   labs(title = "True")
 
 ```
+
 ```{r}
 called.new %>%  mutate(idx = row_number()) %>% 
   ggplot(aes(x = name, y = nznf)) + 
@@ -234,4 +365,93 @@ frgm %>%  mutate(idx = row_number()) %>%
 ```
 
 
-## Further work
+
+
+```{r}
+library(tidyverse)
+library(microseq)
+```
+```{r}
+sq <- microseq::readFasta("/mnt/SCRATCH/ankjelst/data/prdm9/PRDM9a_zf_sig_original.fasta")
+
+sq %>% 
+  mutate(len = str_length(Sequence), 
+         zf = round((len/84)-3)) -> sq
+```
+
+```{r}
+library(gggenes)
+
+full <- tibble()
+for (rown in 1:nrow(sq)){
+  nam <- sq$Header[rown]
+  nznf <- sq$zf[rown]
+  start <- seq(from = 1, to = (nznf*84), by = 84)
+  end <- seq(from = 84, to = (nznf*84), by = 84)
+  df <- tibble(name = nam, start = start, end = end)
+  full <- rbind(full, df)
+}
+
+
+full %>% 
+  mutate(name2 = str_extract(name, pattern = "[:alpha:]*.#[1,2]")) %>%
+  ggplot(aes(xmin = start, xmax = end, y = name2, color = name2)) +
+  geom_linerange(size = 2)+ theme_genes()+
+  theme(legend.position = "none",
+        axis.text.x = element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.x = element_blank(),
+        axis.title.y = element_blank())
+
+
+```
+
+# LR data individuals
+
+
+```{r}
+read_tsv("Name 	Species 	River name 	Phylo. group 	Country 	Gender 	Pop. type 	Lat, Long 	ENA Project  accession 	Old name
+AQGE 	Altantic salmon 	- 	- 	Norway 	Male 	Aquaculture 	- 	PRJEB43080 	Simon
+GLOP 	Altantic salmon 	Gloppenelva 	ATL 	Norway 	Male 	Anadromous 	61.46N, 6.12E 	PRJEB50984 	Klopp
+ARUN 	Altantic salmon 	Årungselva 	ATL 	Norway 	Male 	Anadromous 	59.43N, 10.43E 	PRJEB50985 	Arnold
+ALTA 	Altantic salmon 	Altaelva 	BWS 	Norway 	Male 	Anadromous 	69.58N, 23.22E 	PRJEB50986 	Alto
+TANA 	Altantic salmon 	Tanaelva 	BWS 	Norway 	Male 	Anadromous 	70.29N, 28.23E 	PRJEB50987 	Tanner
+FROM 	Altantic salmon 	River Frome 	ATL 	UK 	Male 	Anadromous 	50.41N, 2.05W 	PRJEB50988 	Tess
+OULO 	Altantic salmon 	Oulujoki 	BAL 	Finland 	Male 	Anadromous 	64.98N, 25.61E 	PRJEB50989 	Barry
+PERU 	Altantic salmon 	Lac Perugia 	NAm 	Canada 	Male 	Landlocked 	47.43N, 76.30W 	PRJEB50990 	Louis/LLsal
+SEBA 	Altantic salmon 	Sebago Lake 	NAm 	USA 	Female 	Landlocked 	43.52N, 70.34W 	PRJEB50991 	Maxine
+GARN-1 	Altantic salmon 	Garnish River 	NAm 	Canada 	Male 	Anadromous 	47.23N, 55.35W 	PRJEB49548 	Brian
+GARN-2 	Altantic salmon 	Garnish River 	NAm 	Canada 	Male 	Anadromous 	47.23N, 55.35W 	PRJEB50992 	Bond
+")
+```
+
+```{r eval=F}
+library(tidyverse)
+library(sf)
+theme_set(theme_bw())
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(ggrepel)
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+class(world)
+
+
+dat <- separate(df[-1,], `Lat, Long`, c("lat", "long"), remove=F, sep =",") %>% 
+  mutate(west = ifelse(str_detect(long, "W"), 1, 0),
+         long = as.numeric(str_extract(long, "[0-9]{1,2}.[0-9]{1,2}")),
+         lat = as.numeric(str_extract(lat, "[0-9]{1,2}.[0-9]{1,2}"))) %>% 
+  mutate(long = ifelse(west == 1, -(long), long))
+
+ggplot(data = world) +
+  geom_sf() + 
+  geom_point(data = dat, mapping = aes(x = long, y = lat), color = "darkred", size = 2)+
+  coord_sf(xlim = c(-80, 30), ylim = c(40, 75))+
+  geom_label_repel(data = dat, mapping = aes(x = long, y = lat, label = `Old name`), size = 3, box.padding = 0.5)
+
+
+```
+
+
+

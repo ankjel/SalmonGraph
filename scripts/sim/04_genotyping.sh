@@ -32,7 +32,7 @@ art_illumina --seqSys HS25 -sam --in "$sample" --paired --len 150 --fcov "$depth
 
 #run giraffe + vg call
 
-gfa="$SCRATCHout"/pggb/pggb.fasta-chop.gfa
+gfa="$SCRATCHout"/pggb/pggb.fasta.gz-chop.gfa
 refheader="ref#1#ssa22"
 
 # inspiration of finding time and memory: https://github.com/vgteam/giraffe-sv-paper/blob/805dcd95d24d2b320fdf253b6ee6a35a3b60066f/scripts/mapping/giraffe_speed.sh
@@ -44,36 +44,39 @@ echo "running genotyping for " "$name"
 fq1="$name"1.fq
 fq2="$name"2.fq
 
-singularity exec vg ~/tools/time bash -c "/mnt/users/ankjelst/tools/vg_v1.38.0.sif vg gbwt -g "$name".giraffe.gbz --gbz-format -G "$gfa" --path-regex "(.*)#(.*)#(.*)" --path-fields _SHC --max-node 0" > gbwt.txt
+echo "gbwt"
+singularity exec "$homedir"/tools/vg_v1.38.0.sif "$homedir"/tools/time -v bash -c "vg gbwt -g "$name".giraffe.gbz --gbz-format -G "$gfa" --path-regex '(.*)#(.*)#(.*)' --path-fields _SHC --max-node 0" 2> gbwt.txt
 
+echo "snarls"
+singularity exec "$homedir"/tools/vg_v1.38.0.sif "$homedir"/tools/time -v bash -c "vg snarls -T "$name".giraffe.gbz" > "$name".snarls 2> snarls.txt
 
-singularity exec vg ~/tools/time bash -c "/mnt/users/ankjelst/tools/vg_v1.38.0.sif vg snarls -T "$name".giraffe.gbz" > "$name".snarls 2> snarls.txt
+echo "index"
+singularity exec "$homedir"/tools/vg_v1.38.0.sif "$homedir"/tools/time -v bash -c "vg index -s "$name".snarls -j "$name".dist -p -b $TMPDIR/$USER "$name".giraffe.gbz" 2> index.txt
 
-singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg ~/tools/time bash -c "vg index -s "$name".snarls -j "$name".dist -p -b $TMPDIR/$USER "$name".giraffe.gbz" > index.txt
+echo "minimizer"
+singularity exec "$homedir"/tools/vg_v1.38.0.sif "$homedir"/tools/time -v bash -c "vg minimizer -o "$name".min -d "$name".dist "$name".giraffe.gbz" 2> minimizer.txt
 
-singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg ~/tools/time bash -c "vg minimizer -o "$name".min -d "$name".dist "$name".giraffe.gbz" > minimizer.txt
-
-singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg ~/tools/time bash -c "giraffe -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE" > "$name".gam 2> giraffe.txt
+echo "giraffe"
+singularity exec "$homedir"/tools/vg_v1.38.0.sif "$homedir"/tools/time -v bash -c "vg giraffe -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE" > "$name".gam 2> giraffe.txt
 
 
 
 # Print mapping stats
 #####################
-
+echo "stats"
 singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg stats -a "$name".gam > "$name".stats
 
 
 # Variant calling
 ##################
-
-singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg ~/tools/time bash -c "vg pack
--x "$gfa" -g "$name".gam -o "$name".pack -t $SLURM_CPUS_ON_NODE" > pack.txt
+echo "pack"
+singularity exec "$homedir"/tools/vg_v1.38.0.sif "$homedir"/tools/time -v bash -c "vg pack -x "$gfa" -g "$name".gam -o "$name".pack -t $SLURM_CPUS_ON_NODE" 2> pack.txt
 
 
 
 # then vg call
-
-singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg ~/tools/time bash -c "vg call \
+echo "call"
+singularity exec "$homedir"/tools/vg_v1.38.0.sif "$homedir"/tools/time -v bash -c "vg call \
 -a -A --pack "$name".pack -t $SLURM_CPUS_ON_NODE --ref-path $refheader --sample $name "$gfa"" > "$name".vcf 2> call.txt
 
 
@@ -88,7 +91,7 @@ echo "FINISHED giraffe + vg call"
 
 # running pangenie
 
-deconstructed_vcf="$SCRATCHout"/pggb/chop-deconstruct-pggb.fasta.vcf.gz
+deconstructed_vcf="$SCRATCHout"/pggb/chop-deconstruct-pggb.fasta.gz.vcf.gz
 
 ###############################################################
 # Remove all nested variants from deconstruct-vcf i.e. LV > 0
@@ -120,8 +123,9 @@ cat $fq1 $fq2 > reads.fq
 
 echo "Run pangenie"
 
-$homedir/tools/time bash -c "$homedir/tools/pangenie/build/src/PanGenie -i reads.fq -r "$pangenieref" -v filtered.vcf -t $SLURM_CPUS_ON_NODE -j $SLURM_CPUS_ON_NODE -o pangenie-"$depth" -s "$name"" > pangenie.txt
+$homedir/tools/time -v bash -c "$homedir/tools/pangenie/build/src/PanGenie -i reads.fq -r $pangenieref -v filtered.vcf -t $SLURM_CPUS_ON_NODE -j $SLURM_CPUS_ON_NODE -o pangenie-"$depth" -s $name"  2> pangenie.txt
 
+echo "done pangenie"
 
 cp pangenie-"$depth"_genotyping.vcf "$SCRATCHout"/h1_pangenie
 ##########################
@@ -139,17 +143,16 @@ echo "Resolve nested genotypes"
 
 echo -e "tool\tclock_time\tmemory(kbytes)\n" > genotype"$depth"_time.txt
 
-for file in "gbwt.txt snarls.txt index.txt minimizer.txt giraffe.txt pack.txt call.txt pangenie.txt"
+for file in gbwt.txt snarls.txt index.txt minimizer.txt giraffe.txt pack.txt call.txt pangenie.txt
 do
     CLOCK_TIME="$(cat $file | grep "Elapsed (wall clock) time" | sed 's/.*\ \([0-9,:]*\)/\1/g')"
     MEMORY="$(cat $file | grep "Maximum resident set" | sed 's/Maximum\ resident\ set\ size\ (kbytes):\ \([0-9]*\)/\1/g')"
 
-    tool=$basename($file .txt)
-    echo -e ""$tool"\t"$CLOCK_TIME"\t"$MEMORY"\n" >>genotype"$depth"_time.txt
+    tool=$(basename "$file" ".txt")
+    echo -e ""$tool"\t"$CLOCK_TIME"\t"$MEMORY"\n" >> genotype"$depth"_time.txt
+done
 
 cp "$name".vcf "$SCRATCHout"/h1
-
-
 
 
 cp *.stats *.vcf *.vcf* genotype"$depth"_time.txt "$jobout"
