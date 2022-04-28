@@ -45,7 +45,7 @@ param_P="1,19,39,3,81,1" # default and fits 98 % identity sequences
 #param_V=ssa05:sample.list  
 #OBSOBS the reference for the vcf here
 #specify a set of VCFs to produce with SPEC = [REF:SAMPLE_LIST_FILE] the paths matching ^REF are used as a reference
-param_V='SimonResolved:#'
+param_V='SimonResolved:#znfArray'
 
 
 SCRATCHout=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-final.out
