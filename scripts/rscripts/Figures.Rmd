@@ -6,65 +6,14 @@ output: html_document
 ---
 
 
-# Introduction
 
-
-
-
-# Methods
-
-Do I have to include how the references were assembled?
-Should I discuss parameters?
-
-### Simulated data set
-
-- Why we chose the two specific regions
-
-- How we selected SVs to insert into new haplotype
-
-- Read simulation
-
-###  Graph construction
-
-- PGGB - Is this where I explain the pggb tools algorithms briefly? What about parameters?
-
-
-### Evaluation of graph
-
-- Visualisation of graph 
-
-- How we compare SVs inserted to SVs found with vg deconstruct
-
-###  Genotyping VG
-
-- VG giraffe - Again, how much detail?
-
-
-- VG call
-
-###  Genotyping Pangenie 
-
-Maybe same paragraph as vg
-Pangenie
-
-Should I mention how the tools are obtained or/and version number?
-
-### PRDM9 zn-finger repeat graph constuction
-
-### PRDM9 zn-finger genotyping and evaluation 
-
-
-
-# Results and discussion
-
-### SV detection
-
-- SV length distrobution -FIGURE
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(cowplot)
 
 library(ggrepel)
 ```
+
+# Check for variant detection
 
 ```{r message=FALSE, warning=FALSE}
 source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/genotypes.R")
@@ -77,6 +26,7 @@ vcf.true %>%
   summarise(n())
 ```
 
+# SV lengths
 
 ```{r full-length-distr, message=FALSE, warning=FALSE}
 labels <- c("Insertions", "Deletions")
@@ -151,7 +101,7 @@ res1
 ggsave("SVlength.png", plot = res1, units = "cm", width = 15, height = 15)
 ```
 
-
+# sv position distribution
 
 ```{r message=FALSE, warning=FALSE}
 
@@ -211,7 +161,7 @@ plot_grid(p1, p2, ncol = 1, labels = c("A", "B"),
 
 ```
 
-
+# Parameter comparison
 
 ```{r message=FALSE, warning=FALSE}
 source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/compare_parameters.R")
@@ -326,9 +276,6 @@ ggsave("MemorytimeparamTest.png", plot = memtime, units = "cm", width = 15, heig
 
 
 
-- Visualisation of graph ?
-- F1 score for different regions and types of SVs
-
 ```{r message=FALSE, warning=FALSE}
 source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/compare_variants.R")
 
@@ -364,6 +311,27 @@ genotypers
 ggsave("genotypers.png", plot = genotypers, units = "cm", width = 15, height = 11)
 
 ```
+
+```{r}
+
+
+time.tbl %>% 
+  mutate(pipeline = ifelse(param.value == "pangenie", "pangenie", "vg"),
+         depth = factor(depth)) -> time.tbl
+         
+time.tbl %>% 
+  ggplot(aes(y = `memory(kbytes)`, x = depth, fill = param.value, group = pipeline)) + geom_col(position = "dodge") + scale_color_brewer(palette = "Dark2")
+
+
+
+time.tbl  %>% 
+  ggplot(aes(y = minutes, x = depth, fill = param.value, group = pipeline)) + geom_col(position = "dodge") +
+  scale_color_brewer(palette = "Dark2")
+
+
+```
+
+
 
 
 ### Zn-finger repeat
@@ -441,6 +409,9 @@ GARN-2 	Altantic salmon 	Garnish River 	NAm 	Canada 	Male 	Anadromous 	47.23N, 5
 ```
 
 ```{r eval=F}
+
+
+# Ran this part locally as i had trouble with sf on the cluster
 library(tidyverse)
 library(sf)
 theme_set(theme_bw())
