@@ -111,3 +111,38 @@ vcf[!(vcf$POS %in% fp.df$POS),] %>%
   summarise(precision = sum(true)/n()) %>% 
   mutate(tool = "vg")-> vg
 
+
+
+data.dir <- "/mnt/SCRATCH/ankjelst/sim_pipe/time/"
+
+for (file in list.files(data.dir, pattern = "_time")){
+  mytbl <- read_tsv(str_c(data.dir, file), col_types = cols(clock_time = col_character())) %>% 
+    pivot_longer(1, names_to = "param", values_to = "param.value") %>%
+    mutate(depth = str_extract(file, "[0-9]{1,2}"),
+           format = str_count(clock_time, pattern=":"))  # Dealing with inconsistent time format in file %H:%M:%S or %M:%S
+
+  if (!exists("time.tbl")){
+    time.tbl <- mytbl
+    
+  }else{
+    time.tbl <- rbind(time.tbl, mytbl)
+  }}
+
+# Dealing with inconsistent time format
+
+time.tbl %>% 
+  filter(format == 1) %>% 
+  mutate(time = strptime(clock_time, format ="%M:%S")) -> m
+
+time.tbl %>% 
+  filter(format == 2) %>% 
+  mutate(time = strptime(clock_time, format ="%H:%M:%S")) -> h
+
+bind_rows(m,h) -> time.tbl
+
+
+# using lubridate::hour and lubridate::minute
+
+time.tbl %>% 
+  mutate(minutes = lubridate::minute(time.tbl$time) + lubridate::minute(time) + lubridate::second(time)/60) -> time.tbl
+
