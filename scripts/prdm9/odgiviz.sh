@@ -10,7 +10,7 @@
 
 cd "$SCRATCH"/data/prdm9
 
-graph=/mnt/SCRATCH/ankjelst/data/prdm9/pggb-final.out/newfull.fasta.826b7f9.4030258.a547c55.smooth.og
+graph="$SCRATCH"/data/prdm9/pggb-TEST-G13117,13219-k84.out/newfull.fasta.8882a41.eefcd36.1b4c821.smooth.og
 
 #singularity exec /mnt/users/ankjelst/tools/pggb_v0.2.0.sif odgi sort -i "$graph" -o sorted.og -O
 #singularity exec /mnt/users/ankjelst/tools/pggb_v0.2.0.sif odgi paths -i sorted.og -L

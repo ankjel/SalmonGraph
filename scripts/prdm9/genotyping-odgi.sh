@@ -7,7 +7,7 @@ fq1=$4
 fq2=$5
 
 
-singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg deconstruct -p 'SimonResolved#2#sige' -e -a -t $SLURM_CPUS_ON_NODE $gfa > deconstructed.vcf
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg deconstruct -p "$refheader" -e -a -t $SLURM_CPUS_ON_NODE $gfa > deconstructed.vcf
 
 singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg gbwt -g "$name".giraffe.gbz --gbz-format -G "$gfa" --path-regex "(.*)#(.*)#(.*)" --path-fields _SHC --max-node 0
 

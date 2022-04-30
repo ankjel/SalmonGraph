@@ -28,4 +28,4 @@ singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif odgi extract -i "$graph
 refpath=$(singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif odgi paths -L -i clean.og | grep "^SimonResolved#2#sige")
 
 singularity exec /mnt/users/ankjelst/tools/pggb-v020.sif odgi view -i clean.og -g > clean.gfa
-singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg deconstruct -p "$refpath" -H "#" -e clean.gfa > clean.vcf 
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg deconstruct -p "SimonResolved#2#sige" -H "#" -e clean.gfa > clean.vcf 
