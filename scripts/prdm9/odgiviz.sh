@@ -10,8 +10,8 @@
 
 cd "$SCRATCH"/data/prdm9
 
-graph="$SCRATCH"/data/prdm9/pggb-TEST-G13117,13219-k84.out/newfull.fasta.8882a41.eefcd36.1b4c821.smooth.og
-
+graph="$SCRATCH"/data/prdm9/pggb-final-k311-p98.out/prdm9-znf.fasta-chop.gfa
+path_viz=/mnt/users/ankjelst/MasterScripts/scripts/prdm9/paths_viz.txt
 #singularity exec /mnt/users/ankjelst/tools/pggb_v0.2.0.sif odgi sort -i "$graph" -o sorted.og -O
 #singularity exec /mnt/users/ankjelst/tools/pggb_v0.2.0.sif odgi paths -i sorted.og -L
-singularity exec /mnt/users/ankjelst/tools/pggb_v0.2.0.sif odgi viz -i $graph -o zf.png -x 500 -s"#" -r "SimonResolved#2#sige:1-10671"
+singularity exec /mnt/users/ankjelst/tools/pggb_v0.2.0.sif odgi viz -i $graph -o zf.png -x 500 -s"#" -r "SimonResolved#2#znfArray:1-10671" -p "$path_viz"

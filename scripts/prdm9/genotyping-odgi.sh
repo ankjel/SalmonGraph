@@ -26,8 +26,7 @@ echo "Running giraffe"
 
 # Giraffe input is the very VG-specific files created with vg autoindex above.
 
-singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg giraffe \
---fragment-mean 400 --fragment-stdev 75 -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE > "$name".gam
+singularity exec /mnt/users/ankjelst/tools/vg_v1.38.0.sif vg giraffe -Z "$name".giraffe.gbz -m "$name".min -d "$name".dist -f "$fq1" -f "$fq2" -p --threads $SLURM_CPUS_ON_NODE > "$name".gam
 
 # https://github.com/vgteam/vg/wiki/Mapping-short-reads-with-Giraffe
 # --fragment-mean 600 --fragment-stdev 68 ?
