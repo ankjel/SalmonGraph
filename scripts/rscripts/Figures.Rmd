@@ -389,6 +389,33 @@ library(microseq)
 ```
 
 
+```{r}
+library(gggenes)
+read_tsv("/mnt/SCRATCH/ankjelst/data/prdm9/pggb-final-k311-p98.out/prdm9-znf.fasta-chop.vcf", comment = "##", col_types = cols(.default="c")) -> deconstruct
+
+line <- 15
+
+
+
+deconstruct[line,] %>% 
+  select(-c(Alto, Brian, Bond, Tanner)) %>% 
+  separate(Arnold, into = c("Arnold1", "Arnold2")) %>% 
+  separate(Klopp, into = c("Klopp1", "Klopp2")) %>% 
+  separate(Maxine, into = c("Maxine1", "Maxine2")) %>% 
+  separate(SimonResolved, into = c("SimonResolved1", "SimonResolved2")) %>% 
+  pivot_longer(10:18) %>% 
+  mutate(value = as.numeric(value),
+         seq = ifelse(value == 0, REF, unlist(str_split(ALT, ","))[value]),
+         len = str_length(seq),
+         start = 1) %>% 
+  ggplot(aes(x = len, y = name, fill = factor(value))) +
+  geom_col() + scale_x_continuous(breaks = c(84, 169, 252)) + labs(fill = "Allele", x = "Allele length", y = "Sample")
+  
+
+```
+
+
+
 # LR data individuals
 
 

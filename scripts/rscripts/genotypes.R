@@ -1,4 +1,4 @@
-source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/new_metrics.R")
+source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/metrics.R")
 
 library(tidyverse)
 

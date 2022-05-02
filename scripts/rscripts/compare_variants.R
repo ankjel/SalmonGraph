@@ -3,7 +3,7 @@ library(tidyverse)
 
 
 
-source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/new_metrics.R")
+source("/mnt/users/ankjelst/MasterScripts/scripts/rscripts/metrics.R")
 
 # I will use functions defined in the script sourced above
 
