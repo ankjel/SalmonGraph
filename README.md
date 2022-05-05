@@ -1,4 +1,4 @@
-# SV detection with pangenome graphs
+# SV calling with pangenome graphs
 
 Scripts for my master thesis. 
 Graph based SV detection and genotyping in the Atlantic Salmon genome.
