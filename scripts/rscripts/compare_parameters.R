@@ -47,6 +47,7 @@ for (file in list.files(data.dir, pattern = "s.*.vcf")){
 
 
 
+
 for (file in list.files(data.dir, pattern = "runtime")){
   mytbl <- read_tsv(str_c(data.dir, file), col_types = cols(clock_time = col_time(format="%M:%S"))) %>% 
     pivot_longer(1, names_to = "param", values_to = "param.value")

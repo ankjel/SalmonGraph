@@ -121,21 +121,4 @@ results %>%
 
 
 
-# No dup
-
-
-path.nodup <- "/mnt/SCRATCH/ankjelst/sim_pipe/pggb/pggb_nodup.fasta.gz.beca995.4030258.7d0af10.smooth.ref.vcf"
-vcf.nodup <- read_delim(path.nodup, delim = "\t", comment="##") %>% 
-  rename("CHROM" = `#CHROM`) %>% 
-  mutate(START = POS, END = POS + str_length(REF))
-
-precision(true.vcf = vcf.true, predicted.vcf = vcf.nodup, tolerance = tol)
-recall(true.vcf = vcf.true, predicted.vcf = vcf.nodup, tolerance = tol)
-
-
-false.negative(true.vcf = vcf.true, predicted.vcf = vcf.nodup, tolerance = tol)
-false.positive(true.vcf = vcf.true, predicted.vcf = vcf.nodup, tolerance = tol)
-true.positive(true.vcf = vcf.true, predicted.vcf = vcf.nodup, tolerance = tol)
-
-
 

@@ -2,7 +2,7 @@ library(tidyverse)
 
 
 # Finding the variants called for each set of reads
-
+line <- 15
 called <- tibble()
 for (file in list.files("/mnt/SCRATCH/ankjelst/data/prdm9/vcfs")){
   if(file == "deconstructed.vcf") next
@@ -11,8 +11,8 @@ for (file in list.files("/mnt/SCRATCH/ankjelst/data/prdm9/vcfs")){
     rename("CHROM" = `#CHROM`) %>% 
     mutate(ALT.PATHS = str_split(str_remove_all(INFO, pattern = "[A-Z]*="), ";")) %>%
     mutate(ALT.PATHS = unlist(lapply(ALT.PATHS, function(x) x[1])))
-  idx1 <- as.numeric(substr(vcf[14, ncol(vcf)-1], 1, 1))
-  idx2 <- as.numeric(substr(vcf[14, ncol(vcf)-1], 3, 3))
+  idx1 <- as.numeric(substr(vcf[line, ncol(vcf)-1], 1, 1))
+  idx2 <- as.numeric(substr(vcf[line, ncol(vcf)-1], 3, 3))
   
   all <- c()
   paths <- c()
@@ -21,192 +21,45 @@ for (file in list.files("/mnt/SCRATCH/ankjelst/data/prdm9/vcfs")){
       call <-  vcf$REF[14]
       all <- c(all, call)
       
-      paths <- c(paths, vcf$ID)
+      paths <- c(paths, vcf$ID[line])
     }else{
-      call <- strsplit(vcf$ALT[14], split=",")[[1]][idx]
+      call <- strsplit(vcf$ALT[line], split=",")[[1]][idx]
       all <- c(all, call)
       
-      path <- strsplit(vcf$ALT.PATHS[14], split=",")[[1]][idx]
+      path <- strsplit(vcf$ALT.PATHS[line], split=",")[[1]][idx+1]
       paths <- c(paths, path)
     }
   
   }
   called <- bind_rows(called, 
-                      tibble(name = str_extract(file, '[A-Z]*'), 
+                      tibble(ID = vcf$ID[line], path = paths, name = str_c(str_extract(file, '[A-Z]*'), c(-1, -2)), 
                              variants = all))
   }
   
-
-called <- called %>% mutate(size = str_length(variants), 
-                  nznf = size/84)
 
 
 
 
 # Check out what we expect:
 
-true.path <- "/mnt/SCRATCH/ankjelst/data/prdm9/vcfs/deconstructed.vcf"
 
-truth <- read_tsv(true.path, comment = "##")[14, ] %>% 
-  select(!starts_with("Simon#")) %>% 
-  pivot_longer(-(1:9)) %>% 
-  mutate(sekvens = ifelse(value == 0, REF, str_split(ALT, pattern = ",")[[1]][value]),
-         length = str_length(sekvens),
-         nznf = length/84) 
+read_tsv("/mnt/SCRATCH/ankjelst/data/prdm9/pggb-final-k311-p98.out/prdm9-znf.fasta-chop.vcf", 
+         comment = "##", col_types = cols(.default="c")) -> deconstruct
 
+deconstruct[line,] %>% 
+  select(-c(Alto, Brian, Bond, Tanner)) %>% 
+  separate(Arnold, into = c("Arnold-1", "Arnold-2")) %>% 
+  separate(Klopp, into = c("Klopp-1", "Klopp-2")) %>% 
+  separate(Maxine, into = c("Maxine-1", "Maxine-2")) %>% 
+  separate(SimonResolved, into = c("Simon-1", "Simon-2")) %>% 
+  pivot_longer(10:18) %>% 
+  mutate(value = as.numeric(value),
+         seq = ifelse(value == 0, REF, unlist(str_split(ALT, ","))[value]),
+         len = str_length(seq),
+         start = 1) %>% 
+  mutate(ALT.PATHS = str_split(str_remove_all(str_extract(INFO, pattern = "AT=.*;"), pattern = "[A-Z]*="), ",")) %>%
+  mutate(called.path = ifelse(value ==0, ID, unlist((ALT.PATHS)[value]))) -> deconstructed.vcf
 
-
-################
-# New graph without collapsed simon 75 bp znf
-
-
-# Finding the variants called for each set of reads
-
-called.new <- tibble()
-for (file in list.files("/mnt/SCRATCH/ankjelst/data/prdm9/vcf_new")){
-  if(file == "deconstructed.vcf") next
-  
-  for (line in c(1,6,7)){
-  vcf <- read_delim(str_c("/mnt/SCRATCH/ankjelst/data/prdm9/vcf_new/", file), delim = "\t", comment="##") %>% 
-    rename("CHROM" = `#CHROM`) %>% 
-    mutate(ALT.PATHS = str_split(str_remove_all(INFO, pattern = "[A-Z]*="), ";")) %>%
-    mutate(ALT.PATHS = unlist(lapply(ALT.PATHS, function(x) x[1])))
-  
-  
-  idx1 <- as.numeric(substr(vcf[line, ncol(vcf)-1], 1, 1))
-  idx2 <- as.numeric(substr(vcf[line, ncol(vcf)-1], 3, 3))
-  
-  all <- c()
-  paths <- c()
-  for (idx in c(idx1, idx2)){
-    if (idx == 0){
-      call <-  vcf$REF[line]
-      all <- c(all, call)
-      
-      paths <- c(paths, vcf$ID)
-    }else{
-      call <- strsplit(vcf$ALT[line], split=",")[[1]][idx]
-      all <- c(all, call)
-      
-      path <- strsplit(vcf$ALT.PATHS[line], split=",")[[1]][idx]
-      paths <- c(paths, path)
-    }
-    
-  }
-  called.new <- bind_rows(called.new, 
-                      tibble(name = str_extract(file, '[A-Z]*'), 
-                             variants = all))}
-}
-
-
-called.new <- called.new %>% mutate(size = str_length(variants), 
-                            nznf = size/84)
-
-
-###############
-#
-
-called.new <- tibble()
-for (file in list.files("/mnt/SCRATCH/ankjelst/data/prdm9/vcf_new")){
-  if(file == "deconstructed.vcf") next
-  vcf <- read_delim(str_c("/mnt/SCRATCH/ankjelst/data/prdm9/vcf_new/", file), delim = "\t", comment="##") %>% 
-      rename("CHROM" = `#CHROM`) %>% 
-      mutate(ALT.PATHS = str_split(str_remove_all(INFO, pattern = "[A-Z]*="), ";")) %>%
-      mutate(ALT.PATHS = unlist(lapply(ALT.PATHS, function(x) x[1])))
-    
-    
-    idx1 <- as.numeric(substr(vcf[line, ncol(vcf)-1], 1, 1))
-    idx2 <- as.numeric(substr(vcf[line, ncol(vcf)-1], 3, 3))
-    
-    all <- c()
-    paths <- c()
-    for (idx in c(idx1, idx2)){
-      if (idx == 0){
-        call <-  vcf$REF[line]
-        all <- c(all, call)
-        
-        paths <- c(paths, vcf$ID)
-      }else{
-        call <- strsplit(vcf$ALT[line], split=",")[[1]][idx]
-        all <- c(all, call)
-        
-        path <- strsplit(vcf$ALT.PATHS[line], split=",")[[1]][idx]
-        paths <- c(paths, path)
-      }
-      
-    }
-    called.new <- bind_rows(called.new, 
-                            tibble(name = str_extract(file, '[A-Z]*'), 
-                                   variants = all))}
-}
-
-
-called.new <- called.new %>% mutate(size = str_length(variants), 
-                                    nznf = size/84)
-
-
-##########################
-# vg deconstructed calls
-
-true.path <- "/mnt/SCRATCH/ankjelst/data/prdm9/vcf_new/deconstructed.vcf"
-
-truth.new.original <- read_tsv(true.path, comment = "##")
-
-truth.new <- read_tsv(true.path, comment = "##")[c(1, 6, 7), ] %>% 
-  select(!starts_with("Simon#")) %>% 
-  pivot_longer(-(1:9)) %>% 
-  mutate(sekvens = ifelse(value == 0, REF, str_split(ALT, pattern = ",")[[1]][value]),
-         length = str_length(sekvens),
-         nznf = length/84) 
-
-
-truth.new %>% group_by(name) %>% 
-  summarise(n = sum(nznf))
-
-
-
-
-## see in a set fragment size helps
-
-frgm <- tibble()
-for (file in list.files("/mnt/SCRATCH/ankjelst/data/prdm9/frgm/")){
-  if(file == "deconstructed.vcf") next
-  
-  for (line in c(1,6,7)){
-    vcf <- read_delim(str_c("/mnt/SCRATCH/ankjelst/data/prdm9/frgm/", file), delim = "\t", comment="##") %>% 
-      rename("CHROM" = `#CHROM`) %>% 
-      mutate(ALT.PATHS = str_split(str_remove_all(INFO, pattern = "[A-Z]*="), ";")) %>%
-      mutate(ALT.PATHS = unlist(lapply(ALT.PATHS, function(x) x[1])))
-    
-    
-    idx1 <- as.numeric(substr(vcf[line, ncol(vcf)-1], 1, 1))
-    idx2 <- as.numeric(substr(vcf[line, ncol(vcf)-1], 3, 3))
-    
-    all <- c()
-    paths <- c()
-    for (idx in c(idx1, idx2)){
-      if (idx == 0){
-        call <-  vcf$REF[line]
-        all <- c(all, call)
-        
-        paths <- c(paths, vcf$ID)
-      }else{
-        call <- strsplit(vcf$ALT[line], split=",")[[1]][idx]
-        all <- c(all, call)
-        
-        path <- strsplit(vcf$ALT.PATHS[line], split=",")[[1]][idx]
-        paths <- c(paths, path)
-      }
-      
-    }
-    frgm <- bind_rows(frgm, 
-                        tibble(name = str_extract(file, '[A-Z]*'), 
-                               variants = all))}
-}
-
-
-frgm <- frgm %>% mutate(size = str_length(variants), 
-                            nznf = size/84)
 
 
 
