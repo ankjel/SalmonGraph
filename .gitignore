@@ -62,7 +62,7 @@ core.*
 *.txt
 
 # Output
-*.html
+
 *.png
 *.pdf
 
