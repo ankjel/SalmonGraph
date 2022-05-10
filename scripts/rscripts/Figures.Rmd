@@ -322,43 +322,39 @@ library(RColorBrewer)
 
 time.tbl %>% 
   mutate(pipeline = ifelse(param.value == "pangenie", "pangenie", "vg"),
-         depth = factor(depth),
+         depth = factor(depth, levels = c("1", "5", "10", "20", "30")),
          tool = factor(param.value),
          combined = str_c(pipeline, tool, sep ="-")) -> time.tbl
          
 
 
-#make color palette
-mycolors=c(colorRampPalette("gray")(1),
-         colorRampPalette(brewer.pal(9,"Accent"))(7))
-names(mycolors)=c(grep("pangenie",unique(time.tbl$combined),value = T),
-                grep("vg",unique(time.tbl$combined),value = T))
-
-
-
 
 time.tbl %>% 
-  mutate(combined.variable = factor(paste(pipeline, param.value, sep = "~"))) %>% 
-  ggplot(aes(y = `memory(kbytes)`, x = depth, fill = combined, group = pipeline)) + geom_col(position = "dodge") +
-  scale_fill_manual(name = "Tool", values = mycolors) + theme_minimal()+
+  ggplot(aes(y = `memory(kbytes)`, x = depth, fill = pipeline, group = pipeline)) + geom_col(position = "dodge") +
+  theme_minimal()+
   theme(legend.position="none", axis.title.x = element_blank(), 
         axis.text.x = element_blank())+
+  
+  scale_fill_brewer(palette = "Dark2")+ 
   labs(y = "Memory\nkbytes")-> gg1
 
 
 time.tbl  %>% 
-  ggplot(aes(y = minutes, x = depth, fill = combined, group = pipeline)) + geom_col(position = "dodge") +theme_minimal()+
-  scale_fill_manual(name = "Tool", values = mycolors) + 
+  ggplot(aes(y = minutes, x = depth, fill = factor(pipeline), group = pipeline)) + geom_col(position = "dodge") +theme_minimal()+
   theme(legend.position = c(.05, .95),
         legend.justification = c("left", "top"),
         legend.box.just = "left",
         legend.margin = margin(6, 6, 6, 6),
         legend.text=element_text(size=8)) +
+  
+  scale_fill_brewer(palette = "Dark2", name = "Pipeline")+
   labs(x = "Read depth", y = "Wall time\nminutes")-> gg2
 
 
 
-plot_grid(gg1, gg2, ncol = 1, align = "v" )->full
+plot_grid(gg1, gg2, ncol = 1, align = "v" ) -> full
+
+full
 
 
 ggsave("genotypememtime.png", plot = full, units = "cm", width = 20, height = 20)
