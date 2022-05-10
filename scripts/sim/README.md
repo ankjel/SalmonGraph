@@ -4,9 +4,9 @@
 **01_sequencesim.sh - simulate data**
 
 Inserting SVs into reference sequence of chromosome 22.  
-&nbsp;
-&nbsp;
-&nbsp;
+
+<br/>
+<br/>
 **02A_paramtest-G.sh and 02B_paramtest-s.sh - running pggb with different -G and -s values**
 
 Output will be a text file with output from `time` and a VCF with genotype calls for each parameter value.
