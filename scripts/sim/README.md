@@ -3,7 +3,8 @@
 
 **01_sequencesim.sh - simulate data**
 
-Inserting SVs into reference sequence of chromosome 22.
+Inserting SVs into reference sequence of chromosome 22.  
+
 
 
 **02A_paramtest-G.sh and 02B_paramtest-s.sh - running pggb with different -G and -s values**
